@@ -5,7 +5,8 @@ import { createAdapter } from "@socket.io/redis-adapter";
 
 const server = http.createServer();
 const io = new Server(server, {
-  path: "/api/socket-io/socket.io",
+  path: "/api/socket-io",
+  addTrailingSlash: false,
   transports: ["websocket"],
   cors: { origin: true, methods: ["GET", "POST"] },
   pingInterval: 20000,
