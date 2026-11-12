@@ -121,3 +121,70 @@ test("simultaneous reciprocal searches produce one shared match", async (t) => {
   assert.equal(a.connected, true);
   assert.equal(b.connected, true);
 });
+
+
+test("reports require an active chat and a valid reason", async (t) => {
+  const url = await startLocalServer(t);
+  const a = client(url);
+  t.after(() => a.close());
+  await event(a, "connect");
+
+  const invalidReason = event(a, "chat-error");
+  a.emit("report", { reason: "give-me-admin" });
+  assert.match(await invalidReason, /valid report reason/);
+
+  const noChat = event(a, "chat-error");
+  a.emit("report", { reason: "harassment" });
+  assert.match(await noChat, /active conversation/);
+});
+
+test("matched users can submit a report and receive an acknowledgement", async (t) => {
+  const url = await startLocalServer(t);
+  const a = client(url);
+  const b = client(url);
+  t.after(() => { a.close(); b.close(); });
+  await Promise.all([event(a, "connect"), event(b, "connect")]);
+
+  const waiting = event(a, "waiting");
+  const matchedA = event(a, "matched");
+  const matchedB = event(b, "matched");
+  a.emit("find-match", { gender: "man", preference: "woman", adult: true });
+  await waiting;
+  b.emit("find-match", { gender: "woman", preference: "man", adult: true });
+  await Promise.all([matchedA, matchedB]);
+
+  const report = event(a, "report-received");
+  a.emit("report", { reason: "harassment" });
+  const receipt = await report;
+  assert.ok(receipt.reportId);
+});
+
+test("malformed and unpaired chat messages are rejected", async (t) => {
+  const url = await startLocalServer(t);
+  const a = client(url);
+  t.after(() => a.close());
+  await event(a, "connect");
+
+  const malformed = event(a, "chat-error");
+  a.emit("chat-message", { text: "hello", peer: "forged" });
+  assert.match(await malformed, /1000 characters/);
+
+  const unpaired = event(a, "chat-error");
+  a.emit("chat-message", { text: "hello" });
+  assert.match(await unpaired, /active chat/);
+});
+
+test("search event rate limits are enforced per client IP", async (t) => {
+  const url = await startLocalServer(t);
+  const a = client(url);
+  t.after(() => a.close());
+  await event(a, "connect");
+
+  const errors = [];
+  a.on("chat-error", (message) => errors.push(message));
+  for (let i = 0; i < 21; i++) {
+    a.emit("find-match", { gender: "man", preference: "woman", adult: true });
+  }
+  await sleep(250);
+  assert.ok(errors.some((message) => /too quickly/i.test(message)));
+});
