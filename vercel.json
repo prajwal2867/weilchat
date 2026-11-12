@@ -1,6 +1,6 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "functions": {
-    "api/socket-io.js": { "maxDuration": 300 }
+    "api/socket-io/socket.io.js": { "maxDuration": 300 }
   }
 }

@@ -22,17 +22,21 @@ test("gender selection derives exactly the opposite preference", () => {
   assert.equal(isValidMatchSelection({ gender: "woman", preference: "woman" }), false);
 });
 
-test("the Socket.IO path is shared and uses the Vercel function endpoint", async () => {
-  const [api, app, integration] = await Promise.all([
-    readFile(new URL("../api/socket-io.js", import.meta.url), "utf8"),
+test("the Socket.IO path maps to an exact Vercel function route", async () => {
+  const [api, app, integration, localServer, vercelText] = await Promise.all([
+    readFile(new URL("../server/socket-server.js", import.meta.url), "utf8"),
     readFile(new URL("../public/app.js", import.meta.url), "utf8"),
-    readFile(new URL("./socket-flow.test.js", import.meta.url), "utf8")
+    readFile(new URL("./socket-flow.test.js", import.meta.url), "utf8"),
+    readFile(new URL("../server/local.js", import.meta.url), "utf8"),
+    readFile(new URL("../vercel.json", import.meta.url), "utf8")
   ]);
+  const vercelConfig = JSON.parse(vercelText);
   assert.equal(SOCKET_PATH, "/api/socket-io/socket.io");
-  assert.equal(SOCKET_SERVER_PATH, "/socket.io");
-  assert.match(api, /path:\s*SOCKET_SERVER_PATH/);
-  assert.match(app, /path:\s*SOCKET_PATH/);
-  assert.match(integration, /path:\s*SOCKET_PATH/);
-  const localServer = await readFile(new URL("../server/local.js", import.meta.url), "utf8");
-  assert.match(localServer, /prependListener\("request", rewriteSocketPath\)/);
+  assert.equal(SOCKET_SERVER_PATH, SOCKET_PATH);
+  assert.ok(api.includes("path: SOCKET_SERVER_PATH"));
+  assert.ok(app.includes("path: SOCKET_PATH"));
+  assert.ok(integration.includes("path: SOCKET_PATH"));
+  assert.ok(localServer.includes("socket-server.js"));
+  assert.doesNotMatch(localServer, /rewriteSocketPath/);
+  assert.ok(vercelConfig.functions["api/socket-io/socket.io.js"]);
 });
