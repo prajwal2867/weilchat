@@ -16,7 +16,7 @@ npm install
 REDIS_URL="rediss://default:<password>@<host>:6379" npm run dev
 ```
 
-The Vercel function is served at `/api/socket-io`; Socket.IO clients use `/api/socket-io/socket.io` and WebSocket transport only.
+The Socket.IO Vercel Function is mounted at `/api/socket-io`; clients use WebSocket transport only. Redis is required for deployed matchmaking so sessions work across function instances. Local development can use process-local queues when `REDIS_URL` is omitted.
 
 ## Deployment
 1. Import this repository into Vercel as the `weilchat` project.
