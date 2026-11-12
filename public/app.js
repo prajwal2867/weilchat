@@ -13,8 +13,9 @@ const screens = ["welcome", "searching", "chat", "ended"];
 let matched = false;
 let reconnectTimer;
 let autoRematch = false;
+let adultConfirmed = false;
 function show(name){for(const id of screens)$(id).classList.toggle("hidden",id!==name)}
-function setConnection(connected){$("connection-label").textContent=connected?"ONLINE":"RECONNECTING";document.querySelector(".header-meta .live-dot").style.background=connected?"#d6d6d6":"#888"}
+function setConnection(connected){$("connection-label").textContent=connected?"ONLINE":"RECONNECTING";document.querySelector(".header-meta .live-dot").style.background=connected?"#9c78f4":"#888"}
 function addMessage(text,mine=false,timestamp=Date.now()){
   const row=document.createElement("article");row.className="message"+(mine?" mine":"");
   const meta=document.createElement("span");meta.className="message-meta";meta.textContent=(mine?"YOU":"STRANGER")+" / "+new Date(timestamp).toLocaleTimeString([],{hour:"2-digit",minute:"2-digit"});
@@ -23,12 +24,13 @@ function addMessage(text,mine=false,timestamp=Date.now()){
 function startMatch(){
   if(!socket.connected){$("search-status").textContent="Reconnecting to the chat server...";show("searching");return}
   const gender=document.querySelector('input[name="gender"]:checked').value;
-  socket.emit("find-match",{gender,preference:gender==="man"?"woman":"man",adult:$("adult-check").checked});matched=false;show("searching");
+  socket.emit("find-match",{gender,preference:gender==="man"?"woman":"man",adult:adultConfirmed});matched=false;show("searching");
 }
-document.querySelectorAll('input[name="gender"]').forEach(radio=>radio.addEventListener("change",()=>{$("match-target").textContent=radio.value==="man"?"WOMEN":"MEN"}));
-$("start-form").addEventListener("submit",event=>{event.preventDefault();if($("adult-check").checked)startMatch()});
+function requestMatch(){if(adultConfirmed)startMatch();else $("adult-dialog").showModal()}
+$("start-form").addEventListener("submit",event=>{event.preventDefault();requestMatch()});
+$("confirm-adult").addEventListener("click",()=>{adultConfirmed=true;startMatch()});
 $("cancel-search").addEventListener("click",()=>{autoRematch=false;socket.emit("next");show("welcome")});
-$("again-button").addEventListener("click",startMatch);
+$("again-button").addEventListener("click",requestMatch);
 $("next-button").addEventListener("click",()=>{autoRematch=true;socket.emit("next");show("searching");$("search-status").textContent="Finding your next conversation..."});
 $("message-form").addEventListener("submit",event=>{event.preventDefault();const input=$("message-input");const text=input.value.trim();if(!text||!matched)return;socket.emit("chat-message",{text});addMessage(text,true);input.value="";input.focus()});
 $("report-button").addEventListener("click",()=>$("report-dialog").showModal());
@@ -42,4 +44,3 @@ socket.on("partner-left",()=>{matched=false;$("chat-status").textContent="The st
 socket.on("chat-reset",()=>{matched=false;$("messages").replaceChildren();if(autoRematch){autoRematch=false;startMatch()}else show("welcome")});
 socket.on("report-received",()=>{$("chat-status").textContent="Report received. Thanks for helping keep Weilchat safer."});
 socket.on("chat-error",message=>{if(!$("chat").classList.contains("hidden"))$("chat-status").textContent=message;else $("search-status").textContent=message});
-

@@ -35,8 +35,6 @@
                 <label class="choice"><input type="radio" name="gender" value="woman"><span>Woman</span></label>
               </div>
             </fieldset>
-            <p class="match-note">WE'LL CONNECT YOU WITH <strong id="match-target">WOMEN</strong></p>
-            <label class="consent"><input id="adult-check" type="checkbox" required><span>I confirm that I am 18 years or older.</span></label>
             <button class="primary-button" type="submit" id="start-button">Find my conversation <span aria-hidden="true">→</span></button>
           </form>
           <p class="fine-print">Text-only conversations · Leave whenever you want · Never share personal details</p>
@@ -97,6 +95,17 @@
       <label><input type="radio" name="reason" value="Spam or scam"> Spam or scam</label>
       <label><input type="radio" name="reason" value="Other"> Something else</label>
       <div class="dialog-actions"><button value="cancel" class="text-button">Cancel</button><button id="submit-report" value="report" class="primary-button">Submit report</button></div>
+    </form>
+  </dialog>
+  <dialog id="adult-dialog">
+    <form method="dialog" class="report-form">
+      <p class="eyebrow">BEFORE YOU BEGIN</p>
+      <h2>Are you 18 or older?</h2>
+      <p class="muted">Weilchat is for adults only.</p>
+      <div class="dialog-actions">
+        <button value="cancel" class="text-button">Cancel</button>
+        <button id="confirm-adult" value="confirm" class="primary-button">Yes, continue</button>
+      </div>
     </form>
   </dialog>
   <script src="https://cdn.socket.io/4.8.1/socket.io.min.js"></script>
