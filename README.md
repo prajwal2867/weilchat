@@ -51,10 +51,13 @@ The project pins Node.js to 22.x. Function connections can still be closed when 
     npm test
     npm run test:e2e
     npm run test:redis
+    npm run test:production
 
 - npm test runs unit tests and local Socket.IO integration tests.
 - npm run test:e2e runs a two-browser flow covering matching, messages, reporting, and leaving.
 - npm run test:redis runs the cross-instance Redis test when REDIS_TEST_URL is configured. It uses a separate weilchat:test:* key namespace; do not point it at production credentials with unrestricted access.
+- npm run test:e2e also verifies reconnect while waiting, graceful recovery after an interrupted chat, and mobile viewport/layout behaviour.
+- npm run test:production runs the live WebSocket smoke test against WEILCHAT_PRODUCTION_URL. It requires WEILCHAT_MODERATION_TOKEN so its temporary report can be checked and dismissed automatically. Run only after a production deployment is ready.
 - GitHub Actions runs unit tests and browser tests on pushes and pull requests to main. The Redis integration job runs when the repository secret REDIS_TEST_URL is configured.
 
 ## Safety boundaries

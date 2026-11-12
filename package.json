@@ -12,7 +12,8 @@
     "test": "npm run test:unit",
     "test:e2e": "playwright test",
     "test:redis": "node --test tests/redis-flow.test.js",
-    "test:unit": "node --test tests/matchmaking.test.js tests/security.test.js tests/socket-flow.test.js"
+    "test:unit": "node --test tests/matchmaking.test.js tests/security.test.js tests/socket-flow.test.js",
+    "test:production": "node tests/production-smoke.js"
   },
   "dependencies": {
     "@socket.io/redis-adapter": "^8.3.0",
