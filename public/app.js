@@ -14,7 +14,7 @@ let matched = false;
 let reconnectTimer;
 let autoRematch = false;
 let adultConfirmed = false;
-function show(name){for(const id of screens)$(id).classList.toggle("hidden",id!==name)}
+function show(name){for(const id of screens)$(id).classList.toggle("hidden",id!==name);document.body.classList.toggle("searching-mode",name==="searching")}
 function setConnection(connected){$("connection-label").textContent=connected?"ONLINE":"RECONNECTING";document.querySelector(".header-meta .live-dot").style.background=connected?"#9c78f4":"#888"}
 function addMessage(text,mine=false,timestamp=Date.now()){
   const row=document.createElement("article");row.className="message"+(mine?" mine":"");
@@ -37,7 +37,6 @@ $("report-button").addEventListener("click",()=>$("report-dialog").showModal());
 $("submit-report").addEventListener("click",event=>{event.preventDefault();const reason=document.querySelector('input[name="reason"]:checked').value;socket.emit("report",{reason});$("report-dialog").close();$("chat-status").textContent="Thanks. Your report has been submitted."});
 socket.on("connect",()=>{clearTimeout(reconnectTimer);setConnection(true);if(!$("searching").classList.contains("hidden"))startMatch()});
 socket.on("disconnect",()=>{setConnection(false);if(matched){matched=false;show("ended");$("chat-status").textContent="Connection interrupted. Start a new chat when you're ready."}});
-socket.on("waiting",()=>{$("search-status").textContent="No one is available yet. We'll connect you as soon as someone joins."});
 socket.on("matched",()=>{clearTimeout(reconnectTimer);matched=true;$("messages").replaceChildren();$("chat-status").textContent="You're connected. Say hello.";show("chat");$("message-input").focus()});
 socket.on("chat-message",message=>addMessage(message.text,false,message.timestamp));
 socket.on("partner-left",()=>{matched=false;$("chat-status").textContent="The stranger has left the conversation.";show("ended")});
