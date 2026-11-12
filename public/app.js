@@ -14,7 +14,8 @@ let matched = false;
 let reconnectTimer;
 let autoRematch = false;
 let adultConfirmed = false;
-function show(name){for(const id of screens)$(id).classList.toggle("hidden",id!==name);document.body.classList.toggle("searching-mode",name==="searching")}
+function show(name){for(const id of screens)$(id).classList.toggle("hidden",id!==name);document.body.classList.toggle("searching-mode",name==="searching");document.body.classList.toggle("chat-mode",name==="chat");if(name!=="chat")closeProfileMenu()}
+function closeProfileMenu(){$("profile-menu").classList.add("hidden");$("profile-button").setAttribute("aria-expanded","false")}
 function setConnection(connected){$("connection-label").textContent=connected?"ONLINE":"RECONNECTING";document.querySelector(".header-meta .live-dot").style.background=connected?"#9c78f4":"#888"}
 function addMessage(text,mine=false,timestamp=Date.now()){
   const row=document.createElement("article");row.className="message"+(mine?" mine":"");
@@ -29,11 +30,12 @@ function startMatch(){
 function requestMatch(){if(adultConfirmed)startMatch();else $("adult-dialog").showModal()}
 $("start-form").addEventListener("submit",event=>{event.preventDefault();requestMatch()});
 $("confirm-adult").addEventListener("click",()=>{adultConfirmed=true;startMatch()});
+$("profile-button").addEventListener("click",()=>{const open=$("profile-menu").classList.toggle("hidden")===false;$("profile-button").setAttribute("aria-expanded",String(open))});
 $("cancel-search").addEventListener("click",()=>{autoRematch=false;socket.emit("next");show("welcome")});
 $("again-button").addEventListener("click",requestMatch);
-$("next-button").addEventListener("click",()=>{autoRematch=true;socket.emit("next");show("searching");$("search-status").textContent="Finding your next conversation..."});
 $("message-form").addEventListener("submit",event=>{event.preventDefault();const input=$("message-input");const text=input.value.trim();if(!text||!matched)return;socket.emit("chat-message",{text});addMessage(text,true);input.value="";input.focus()});
-$("report-button").addEventListener("click",()=>$("report-dialog").showModal());
+$("report-button").addEventListener("click",()=>{closeProfileMenu();$("report-dialog").showModal()});
+$("next-button").addEventListener("click",()=>{closeProfileMenu();autoRematch=true;socket.emit("next");show("searching");$("search-status").textContent="Finding your next conversation..."});
 $("submit-report").addEventListener("click",event=>{event.preventDefault();const reason=document.querySelector('input[name="reason"]:checked').value;socket.emit("report",{reason});$("report-dialog").close();$("chat-status").textContent="Thanks. Your report has been submitted."});
 socket.on("connect",()=>{clearTimeout(reconnectTimer);setConnection(true);if(!$("searching").classList.contains("hidden"))startMatch()});
 socket.on("disconnect",()=>{setConnection(false);if(matched){matched=false;show("ended");$("chat-status").textContent="Connection interrupted. Start a new chat when you're ready."}});
