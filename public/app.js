@@ -1,5 +1,6 @@
 const socket = io({
-  path: "/api/socket-io/socket.io",
+  path: "/api/socket-io",
+  addTrailingSlash: false,
   transports: ["websocket"],
   reconnection: true,
   reconnectionAttempts: Infinity,
