@@ -1,6 +1,6 @@
 # Weilchat
 
-Anonymous, text-only random chat. The UI borrows Buckshot Browser's restrained terminal layout while using Segoe UI.
+Anonymous, text-only random chat. The UI uses a bright neo-corporate visual identity: white space, oversized typography, deep navy text, blush surfaces, rounded cards, and purple-to-magenta gradient accents.
 
 ## Stack
 - Static HTML/CSS/JavaScript frontend
