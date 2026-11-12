@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#111111">
+  <meta name="description" content="Weilchat — meet someone new, one conversation at a time.">
+  <title>WEILCHAT</title>
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+  <header class="site-header">
+    <a class="brand" href="/" aria-label="Weilchat home">WEILCHAT<span class="brand-dot">.</span></a>
+    <div class="header-meta"><span class="live-dot"></span><span id="connection-label">CONNECTING</span></div>
+  </header>
+  <main>
+    <section id="welcome" class="terminal">
+      <p class="eyebrow">ANONYMOUS CHAT / RANDOM CONNECTIONS</p>
+      <h1>Talk to someone<br>you haven't met.</h1>
+      <p class="intro">No profiles. No usernames. Just a new conversation.</p>
+      <div class="rule"></div>
+      <form id="start-form">
+        <label class="field-label" for="gender">01 / I IDENTIFY AS</label>
+        <div class="choice-row">
+          <label class="choice"><input type="radio" name="gender" value="man" checked><span>MAN</span></label>
+          <label class="choice"><input type="radio" name="gender" value="woman"><span>WOMAN</span></label>
+        </div>
+        <p class="match-note">YOU'LL BE MATCHED WITH <strong id="match-target">WOMEN</strong></p>
+        <label class="consent"><input id="adult-check" type="checkbox" required><span>I confirm that I am 18 years or older and agree to use Weilchat respectfully.</span></label>
+        <button class="primary-button" type="submit" id="start-button">[ FIND A STRANGER ] <span>↗</span></button>
+      </form>
+      <p class="fine-print">Text-only conversations · Leave whenever you want · Never share personal details</p>
+    </section>
+    <section id="searching" class="terminal hidden" aria-live="polite">
+      <p class="eyebrow">MATCHMAKING / IN PROGRESS</p>
+      <h2>Looking for someone<span class="ellipsis">...</span></h2>
+      <p id="search-status" class="muted">Checking for an available stranger.</p>
+      <div class="loader-track"><span></span></div>
+      <button class="text-button" id="cancel-search">[ CANCEL ]</button>
+    </section>
+    <section id="chat" class="terminal chat-panel hidden">
+      <div class="chat-topline">
+        <div><p class="eyebrow">PRIVATE SESSION</p><h2>YOU ↔ STRANGER</h2></div>
+        <span class="session-state"><span class="live-dot"></span> CONNECTED</span>
+      </div>
+      <div id="messages" class="messages" role="log" aria-live="polite" aria-relevant="additions"></div>
+      <p id="chat-status" class="chat-status">You're connected. Say hello.</p>
+      <form id="message-form" class="message-form">
+        <label for="message-input">›</label>
+        <input id="message-input" maxlength="1000" autocomplete="off" placeholder="Type a message..." aria-label="Your message">
+        <button type="submit" aria-label="Send message">SEND ↗</button>
+      </form>
+      <div class="chat-actions">
+        <button id="report-button" class="text-button">[ REPORT ]</button>
+        <button id="next-button" class="text-button danger">[ NEXT STRANGER → ]</button>
+      </div>
+    </section>
+    <section id="ended" class="terminal hidden">
+      <p class="eyebrow">SESSION ENDED</p>
+      <h2>That conversation is over.</h2>
+      <p class="muted">Ready to meet someone else?</p>
+      <button class="primary-button" id="again-button">[ FIND ANOTHER STRANGER ] <span>↗</span></button>
+    </section>
+    <footer class="site-footer">
+      <span>WEILCHAT / BETA</span><span>BE KIND. STAY ANONYMOUS.</span>
+    </footer>
+  </main>
+  <dialog id="report-dialog">
+    <form method="dialog" class="report-form">
+      <p class="eyebrow">SAFETY / REPORT</p><h2>What happened?</h2>
+      <label><input type="radio" name="reason" value="Harassment" checked> Harassment or abuse</label>
+      <label><input type="radio" name="reason" value="Inappropriate content"> Inappropriate content</label>
+      <label><input type="radio" name="reason" value="Spam or scam"> Spam or scam</label>
+      <label><input type="radio" name="reason" value="Other"> Something else</label>
+      <div class="dialog-actions"><button value="cancel" class="text-button">CANCEL</button><button id="submit-report" value="report" class="primary-button">SUBMIT REPORT</button></div>
+    </form>
+  </dialog>
+  <script src="https://cdn.socket.io/4.8.1/socket.io.min.js"></script>
+  <script type="module" src="/app.js"></script>
+</body>
+</html>
+
