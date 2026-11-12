@@ -2,10 +2,14 @@ import http from "node:http";
 import { Server } from "socket.io";
 import Redis from "ioredis";
 import { createAdapter } from "@socket.io/redis-adapter";
+import { isValidMatchSelection } from "../public/matchmaking.js";
+import { SOCKET_SERVER_PATH } from "../public/socket-config.js";
+
+export { SOCKET_SERVER_PATH };
 
 const server = http.createServer();
 const io = new Server(server, {
-  path: "/api/socket-io",
+  path: SOCKET_SERVER_PATH,
   addTrailingSlash: false,
   transports: ["websocket"],
   cors: { origin: true, methods: ["GET", "POST"] },
@@ -16,7 +20,7 @@ const io = new Server(server, {
 
 const redisUrl = process.env.REDIS_URL;
 let redis;
-let localWaiting = new Map();
+const localWaiting = new Map();
 
 if (redisUrl) {
   redis = new Redis(redisUrl, { lazyConnect: true, maxRetriesPerRequest: 2 });
@@ -30,55 +34,88 @@ const prefix = "weilchat:v1:";
 const userKey = (id) => prefix + "user:" + id;
 const queueKey = (gender, preference) => prefix + "queue:" + gender + ":" + preference;
 
+// Matching and queue insertion happen in one Redis transaction. Stale queue
+// entries are discarded, and only a genuinely reciprocal selection can match.
 const matchScript = `
 local candidate = redis.call("LPOP", KEYS[1])
 while candidate do
-  local status = redis.call("HGET", ARGV[1] .. candidate, "status")
-  if status == "waiting" then
-    redis.call("HSET", ARGV[1] .. candidate, "status", "matched", "peer", ARGV[2], "room", ARGV[3])
-    redis.call("HSET", ARGV[1] .. ARGV[2], "status", "matched", "peer", candidate, "room", ARGV[3])
-    redis.call("EXPIRE", ARGV[1] .. candidate, 900)
+  local candidateKey = ARGV[1] .. candidate
+  local status = redis.call("HGET", candidateKey, "status")
+  local candidateGender = redis.call("HGET", candidateKey, "gender")
+  local candidatePreference = redis.call("HGET", candidateKey, "preference")
+  if status == "waiting" and candidateGender == ARGV[4] and candidatePreference == ARGV[5] then
+    redis.call("HSET", candidateKey, "status", "matched", "peer", ARGV[2], "room", ARGV[3])
+    redis.call("HSET", ARGV[1] .. ARGV[2], "gender", ARGV[6], "preference", ARGV[7], "status", "matched", "peer", candidate, "room", ARGV[3])
+    redis.call("EXPIRE", candidateKey, 900)
     redis.call("EXPIRE", ARGV[1] .. ARGV[2], 900)
     return candidate
   end
   candidate = redis.call("LPOP", KEYS[1])
 end
+redis.call("LREM", KEYS[2], 0, ARGV[2])
 redis.call("RPUSH", KEYS[2], ARGV[2])
-redis.call("HSET", ARGV[1] .. ARGV[2], "gender", ARGV[4], "preference", ARGV[5], "status", "waiting", "peer", "", "room", "")
+redis.call("HSET", ARGV[1] .. ARGV[2], "gender", ARGV[6], "preference", ARGV[7], "status", "waiting", "peer", "", "room", "")
 redis.call("EXPIRE", ARGV[1] .. ARGV[2], 900)
+redis.call("EXPIRE", KEYS[2], 900)
 return ""
 `;
 
-async function removeFromQueue(id, gender, preference) {
-  if (redis) {
-    await redis.lrem(queueKey(gender, preference), 0, id);
-    await redis.del(userKey(id));
-  } else localWaiting.delete(id);
-}
+// Leaving is atomic: remove a waiting user from their queue, clear the peer
+// only if the peer still points back to this socket, then delete this user.
+const leaveScript = `
+local userKey = KEYS[1]
+local status = redis.call("HGET", userKey, "status")
+local peer = redis.call("HGET", userKey, "peer")
+redis.call("LREM", KEYS[2], 0, ARGV[2])
+redis.call("LREM", KEYS[3], 0, ARGV[2])
+if peer and peer ~= "" then
+  local peerKey = ARGV[1] .. "user:" .. peer
+  if redis.call("HGET", peerKey, "peer") == ARGV[2] then
+    redis.call("HSET", peerKey, "status", "idle", "peer", "", "room", "")
+    redis.call("EXPIRE", peerKey, 900)
+  else
+    peer = ""
+  end
+end
+redis.call("DEL", userKey)
+return {peer or "", status or "idle"}
+`;
 
 async function findMatch(socket, gender, preference) {
   if (redis) {
     const room = "chat:" + crypto.randomUUID();
     const candidate = await redis.eval(
-      matchScript, 2,
+      matchScript,
+      2,
       queueKey(preference, gender),
       queueKey(gender, preference),
-      prefix + "user:", socket.id, room, gender, preference
+      prefix + "user:",
+      socket.id,
+      room,
+      preference,
+      gender,
+      gender,
+      preference
     );
     if (candidate) {
+      socket.data.waiting = false;
       socket.emit("matched", { partner: "Stranger" });
       io.to(candidate).emit("matched", { partner: "Stranger" });
       return;
     }
   } else {
-    const reciprocal = [...localWaiting.entries()].find(([, item]) => item.gender === preference && item.preference === gender);
+    const reciprocal = [...localWaiting.entries()].find(([, item]) =>
+      item.gender === preference && item.preference === gender
+    );
     if (reciprocal) {
       const [peerId] = reciprocal;
       localWaiting.delete(peerId);
-      socket.data.peer = peerId;
       const peer = io.sockets.sockets.get(peerId);
       if (peer) {
+        socket.data.peer = peerId;
+        socket.data.waiting = false;
         peer.data.peer = socket.id;
+        peer.data.waiting = false;
         socket.emit("matched", { partner: "Stranger" });
         peer.emit("matched", { partner: "Stranger" });
         return;
@@ -86,6 +123,7 @@ async function findMatch(socket, gender, preference) {
     }
     localWaiting.set(socket.id, { gender, preference });
   }
+
   socket.data.gender = gender;
   socket.data.preference = preference;
   socket.data.waiting = true;
@@ -93,27 +131,33 @@ async function findMatch(socket, gender, preference) {
 }
 
 async function leaveChat(socket, notifyPeer = true) {
-  const peerId = redis ? await redis.hget(userKey(socket.id), "peer") : socket.data.peer;
+  let peerId = null;
   if (redis) {
-    const status = await redis.hget(userKey(socket.id), "status");
-    if (status === "waiting" && socket.data.gender && socket.data.preference) {
-      await redis.lrem(queueKey(socket.data.gender, socket.data.preference), 0, socket.id);
-      await redis.del(userKey(socket.id));
-    }
-  } else if (socket.data.waiting && socket.data.gender) {
-    await removeFromQueue(socket.id, socket.data.gender, socket.data.preference);
-  }
-  if (peerId) {
-    if (redis) {
-      await redis.hset(userKey(peerId), "status", "idle", "peer", "", "room", "");
-      await redis.expire(userKey(peerId), 900);
-      await redis.hset(userKey(socket.id), "status", "idle", "peer", "", "room", "");
-    } else {
+    const result = await redis.eval(
+      leaveScript,
+      3,
+      userKey(socket.id),
+      queueKey("man", "woman"),
+      queueKey("woman", "man"),
+      prefix,
+      socket.id
+    );
+    peerId = result?.[0] || null;
+  } else {
+    if (socket.data.waiting) localWaiting.delete(socket.id);
+    peerId = socket.data.peer || null;
+    if (peerId) {
       const peer = io.sockets.sockets.get(peerId);
-      if (peer) peer.data.peer = null;
+      if (peer && peer.data.peer === socket.id) {
+        peer.data.peer = null;
+        peer.data.waiting = false;
+      } else {
+        peerId = null;
+      }
     }
-    if (notifyPeer) io.to(peerId).emit("partner-left");
   }
+
+  if (peerId && notifyPeer) io.to(peerId).emit("partner-left");
   socket.data.waiting = false;
   socket.data.peer = null;
 }
@@ -123,8 +167,6 @@ io.on("connection", (socket) => {
 
   socket.on("find-match", async (payload = {}) => {
     try {
-      const gender = payload.gender;
-      const preference = payload.preference;
       if (payload.adult !== true) {
         socket.emit("chat-error", "You must confirm that you are 18 or older.");
         return;
@@ -133,14 +175,14 @@ io.on("connection", (socket) => {
         socket.emit("chat-error", "Chat is not configured yet. Please try again later.");
         return;
       }
-      if (!["man", "woman"].includes(gender) || !["man", "woman"].includes(preference) || gender === preference) {
+      if (!isValidMatchSelection(payload)) {
         socket.emit("chat-error", "Choose a gender and its opposite to continue.");
         return;
       }
       await leaveChat(socket, true);
-      socket.data.gender = gender;
-      socket.data.preference = preference;
-      await findMatch(socket, gender, preference);
+      socket.data.gender = payload.gender;
+      socket.data.preference = payload.preference;
+      await findMatch(socket, payload.gender, payload.preference);
     } catch (error) {
       console.error("matchmaking error", error);
       socket.emit("chat-error", "Matchmaking is temporarily unavailable. Please try again.");
@@ -194,7 +236,6 @@ io.on("connection", (socket) => {
   socket.on("disconnect", async () => {
     try {
       await leaveChat(socket, true);
-      if (redis) await redis.del(userKey(socket.id));
     } catch (error) {
       console.error("disconnect cleanup error", error);
     }
@@ -202,4 +243,3 @@ io.on("connection", (socket) => {
 });
 
 export default server;
-

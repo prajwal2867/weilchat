@@ -1,5 +1,7 @@
+import { preferenceForGender } from "./matchmaking.js";
+import { SOCKET_PATH } from "./socket-config.js";
 const socket = io({
-  path: "/api/socket-io",
+  path: SOCKET_PATH,
   addTrailingSlash: false,
   transports: ["websocket"],
   reconnection: true,
@@ -24,7 +26,7 @@ function addMessage(text,mine=false,timestamp=Date.now()){
 function startMatch(){
   if(!socket.connected){$("search-status").textContent="Reconnecting to the chat server...";show("searching");return}
   const gender=document.querySelector('input[name="gender"]:checked').value;
-  socket.emit("find-match",{gender,preference:gender==="man"?"woman":"man",adult:adultConfirmed});matched=false;show("searching");
+  socket.emit("find-match",{gender,preference:preferenceForGender(gender),adult:adultConfirmed});matched=false;show("searching");
 }
 function requestMatch(){if(adultConfirmed)startMatch();else $("adult-dialog").showModal()}
 $("start-form").addEventListener("submit",event=>{event.preventDefault();requestMatch()});
