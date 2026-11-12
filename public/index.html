@@ -3,64 +3,58 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-  <meta name="theme-color" content="#ffffff">
-  <meta name="description" content="Weilchat — meet someone new, one conversation at a time.">
-  <title>Weilchat — Meet someone new</title>
+  <meta name="theme-color" content="#fcfbff">
+  <meta name="description" content="Weilchat — good talks start with hello. Meet someone new, anonymously.">
+  <title>Weilchat — Good talks start with hello</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/style.css">
 </head>
 <body>
   <header class="site-header">
-    <a class="brand" href="/" aria-label="Weilchat home">weilchat<span class="brand-dot">.</span></a>
+    <a class="brand" href="/" aria-label="Weilchat home"><span class="brand-mark">W</span><span>weilchat</span></a>
     <div class="header-meta"><span class="live-dot"></span><span id="connection-label">CONNECTING</span></div>
   </header>
 
   <main>
-    <section id="welcome" class="app-screen">
-      <div class="hero-copy">
-        <p class="eyebrow">A LITTLE LESS STRANGE. A LOT MORE HUMAN.</p>
-        <h1>Good talks start with<br><span class="gradient-text">hello.</span></h1>
-        <p class="intro">Meet someone new, completely anonymously. No profiles, no pressure — just one conversation at a time.</p>
-      </div>
+    <section id="welcome" class="app-screen welcome-screen">
+      <div class="welcome-layout">
+        <div class="welcome-copy">
+          <div class="hero-heading" aria-label="Good talks start with hello">
+            <h1>Good talks<br>start with<br><span>hello.</span></h1>
+          </div>
+          <p class="intro">Meet someone new, completely anonymously. No profiles,<br class="desktop-break"> no pressure — just one conversation at a time.</p>
 
-      <div class="welcome-grid">
-        <section class="start-card" aria-labelledby="start-heading">
-          <p class="eyebrow">YOUR NEXT CONVERSATION</p>
-          <h2 id="start-heading">A fresh face. A real conversation.</h2>
-          <p class="card-copy">Choose who you'd like to meet. We'll find someone who's looking for the same kind of connection.</p>
-
-          <form id="start-form">
-            <label class="field-label" for="gender">I identify as</label>
-            <div class="choice-row">
-              <label class="choice"><input type="radio" name="gender" value="man" checked><span>Man</span></label>
-              <label class="choice"><input type="radio" name="gender" value="woman"><span>Woman</span></label>
-            </div>
+          <div class="form-divider"></div>
+          <form id="start-form" class="start-form">
+            <fieldset>
+              <legend>First, tell us how you identify</legend>
+              <div class="choice-row">
+                <label class="choice"><input type="radio" name="gender" value="man" checked><span>Man</span></label>
+                <label class="choice"><input type="radio" name="gender" value="woman"><span>Woman</span></label>
+              </div>
+            </fieldset>
             <p class="match-note">WE'LL CONNECT YOU WITH <strong id="match-target">WOMEN</strong></p>
-            <label class="consent"><input id="adult-check" type="checkbox" required><span>I confirm that I am 18 years or older and agree to use Weilchat respectfully.</span></label>
-            <button class="primary-button" type="submit" id="start-button">Find my conversation <span aria-hidden="true">↗</span></button>
+            <label class="consent"><input id="adult-check" type="checkbox" required><span>I confirm that I am 18 years or older.</span></label>
+            <button class="primary-button" type="submit" id="start-button">Find my conversation <span aria-hidden="true">→</span></button>
           </form>
-          <p class="fine-print">Text-only · Leave whenever you want · Never share personal details</p>
-        </section>
+          <p class="fine-print">Text-only conversations · Leave whenever you want · Never share personal details</p>
+        </div>
 
         <aside class="conversation-art" aria-label="Illustration of an anonymous conversation">
-          <div class="art-orbit orbit-one"></div>
-          <div class="art-orbit orbit-two"></div>
-          <div class="chat-preview">
-            <div class="preview-top"><span class="preview-avatar">W</span><div><strong>A new connection</strong><small><span class="preview-online"></span> Anonymous · Online</small></div><span class="preview-menu">•••</span></div>
-            <div class="preview-messages">
-              <div class="preview-bubble stranger-bubble">Hey! How's your day going?</div>
-              <div class="preview-bubble you-bubble">Pretty good now. What's something you're excited about?</div>
-              <div class="preview-bubble stranger-bubble short-bubble">Honestly? Meeting new people.</div>
-            </div>
-            <div class="preview-input"><span>Write something kind...</span><b>↗</b></div>
+          <div class="art-circle circle-top"></div>
+          <div class="art-circle circle-left"></div>
+          <div class="art-circle circle-bottom"></div>
+          <div class="chat-illustration">
+            <div class="illustration-sheet"></div>
+            <div class="illustration-bubble"><i></i><i></i><span></span></div>
           </div>
-          <div class="art-note note-top"><span class="note-icon">✳</span><span><strong>No profiles</strong><small>Just be yourself</small></span></div>
-          <div class="art-note note-bottom"><span class="note-icon">♡</span><span><strong>Keep it human</strong><small>One chat at a time</small></span></div>
         </aside>
       </div>
-      <div class="trust-row" id="how-it-works"><span><i>✓</i> Completely anonymous</span><span><i>✓</i> Text-only conversations</span><span><i>✓</i> You're always in control</span></div>
     </section>
 
-    <section id="searching" class="app-screen hidden" aria-live="polite">
+    <section id="searching" class="app-screen state-screen hidden" aria-live="polite">
       <p class="eyebrow">MAKING A CONNECTION</p>
       <h2>Someone interesting is out there.</h2>
       <p id="search-status" class="muted">Looking for an available conversation partner.</p>
@@ -86,16 +80,13 @@
       </div>
     </section>
 
-    <section id="ended" class="app-screen ended-panel hidden">
+    <section id="ended" class="app-screen state-screen ended-panel hidden">
       <p class="eyebrow">THAT'S A WRAP</p>
       <h2>Every good conversation leaves a little something.</h2>
       <p class="muted">Ready to meet someone else?</p>
-      <button class="primary-button" id="again-button">Find another conversation <span aria-hidden="true">↗</span></button>
+      <button class="primary-button" id="again-button">Find another conversation <span aria-hidden="true">→</span></button>
     </section>
-
-    <footer class="site-footer">
-      <span>WEILCHAT / BETA</span><span>BE KIND. STAY ANONYMOUS.</span>
-    </footer>
+    <footer class="site-footer"><span>WEILCHAT / BETA</span><span>BE KIND. STAY ANONYMOUS.</span></footer>
   </main>
 
   <dialog id="report-dialog">
