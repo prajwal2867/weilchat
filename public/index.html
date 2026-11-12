@@ -13,26 +13,53 @@
     <a class="brand" href="/" aria-label="Weilchat home">weilchat<span class="brand-dot">.</span></a>
     <div class="header-meta"><span class="live-dot"></span><span id="connection-label">CONNECTING</span></div>
   </header>
+
   <main>
     <section id="welcome" class="app-screen">
-      <div>
+      <div class="hero-copy">
         <p class="eyebrow">A LITTLE LESS STRANGE. A LOT MORE HUMAN.</p>
-        <h1>Good talks<br>start with <span class="gradient-text">hello.</span></h1>
+        <h1>Good talks start with<br><span class="gradient-text">hello.</span></h1>
         <p class="intro">Meet someone new, completely anonymously. No profiles, no pressure — just one conversation at a time.</p>
-        <div class="rule"></div>
-        <form id="start-form">
-          <label class="field-label" for="gender">First, tell us how you identify</label>
-          <div class="choice-row">
-            <label class="choice"><input type="radio" name="gender" value="man" checked><span>Man</span></label>
-            <label class="choice"><input type="radio" name="gender" value="woman"><span>Woman</span></label>
-          </div>
-          <p class="match-note">WE'LL CONNECT YOU WITH <strong id="match-target">WOMEN</strong></p>
-          <label class="consent"><input id="adult-check" type="checkbox" required><span>I confirm that I am 18 years or older and agree to use Weilchat respectfully.</span></label>
-          <button class="primary-button" type="submit" id="start-button">Find my conversation <span>↗</span></button>
-        </form>
-        <p class="fine-print">Text-only conversations · Leave whenever you want · Never share personal details</p>
       </div>
+
+      <div class="welcome-grid">
+        <section class="start-card" aria-labelledby="start-heading">
+          <p class="eyebrow">YOUR NEXT CONVERSATION</p>
+          <h2 id="start-heading">A fresh face. A real conversation.</h2>
+          <p class="card-copy">Choose who you'd like to meet. We'll find someone who's looking for the same kind of connection.</p>
+
+          <form id="start-form">
+            <label class="field-label" for="gender">I identify as</label>
+            <div class="choice-row">
+              <label class="choice"><input type="radio" name="gender" value="man" checked><span>Man</span></label>
+              <label class="choice"><input type="radio" name="gender" value="woman"><span>Woman</span></label>
+            </div>
+            <p class="match-note">WE'LL CONNECT YOU WITH <strong id="match-target">WOMEN</strong></p>
+            <label class="consent"><input id="adult-check" type="checkbox" required><span>I confirm that I am 18 years or older and agree to use Weilchat respectfully.</span></label>
+            <button class="primary-button" type="submit" id="start-button">Find my conversation <span aria-hidden="true">↗</span></button>
+          </form>
+          <p class="fine-print">Text-only · Leave whenever you want · Never share personal details</p>
+        </section>
+
+        <aside class="conversation-art" aria-label="Illustration of an anonymous conversation">
+          <div class="art-orbit orbit-one"></div>
+          <div class="art-orbit orbit-two"></div>
+          <div class="chat-preview">
+            <div class="preview-top"><span class="preview-avatar">W</span><div><strong>A new connection</strong><small><span class="preview-online"></span> Anonymous · Online</small></div><span class="preview-menu">•••</span></div>
+            <div class="preview-messages">
+              <div class="preview-bubble stranger-bubble">Hey! How's your day going?</div>
+              <div class="preview-bubble you-bubble">Pretty good now. What's something you're excited about?</div>
+              <div class="preview-bubble stranger-bubble short-bubble">Honestly? Meeting new people.</div>
+            </div>
+            <div class="preview-input"><span>Write something kind...</span><b>↗</b></div>
+          </div>
+          <div class="art-note note-top"><span class="note-icon">✳</span><span><strong>No profiles</strong><small>Just be yourself</small></span></div>
+          <div class="art-note note-bottom"><span class="note-icon">♡</span><span><strong>Keep it human</strong><small>One chat at a time</small></span></div>
+        </aside>
+      </div>
+      <div class="trust-row" id="how-it-works"><span><i>✓</i> Completely anonymous</span><span><i>✓</i> Text-only conversations</span><span><i>✓</i> You're always in control</span></div>
     </section>
+
     <section id="searching" class="app-screen hidden" aria-live="polite">
       <p class="eyebrow">MAKING A CONNECTION</p>
       <h2>Someone interesting is out there.</h2>
@@ -40,6 +67,7 @@
       <div class="loader-track"><span></span></div>
       <button class="text-button" id="cancel-search">Cancel search</button>
     </section>
+
     <section id="chat" class="app-screen chat-panel hidden">
       <div class="chat-topline">
         <div><p class="eyebrow">YOUR PRIVATE CHAT</p><h2>A new connection</h2></div>
@@ -48,7 +76,7 @@
       <div id="messages" class="messages" role="log" aria-live="polite" aria-relevant="additions"></div>
       <p id="chat-status" class="chat-status">You're connected. Say hello.</p>
       <form id="message-form" class="message-form">
-        <label for="message-input">✳</label>
+        <label for="message-input" aria-hidden="true">✳</label>
         <input id="message-input" maxlength="1000" autocomplete="off" placeholder="Write something kind..." aria-label="Your message">
         <button type="submit" aria-label="Send message">Send ↗</button>
       </form>
@@ -57,16 +85,19 @@
         <button id="next-button" class="text-button danger">Next stranger →</button>
       </div>
     </section>
-    <section id="ended" class="app-screen hidden">
+
+    <section id="ended" class="app-screen ended-panel hidden">
       <p class="eyebrow">THAT'S A WRAP</p>
       <h2>Every good conversation leaves a little something.</h2>
       <p class="muted">Ready to meet someone else?</p>
-      <button class="primary-button" id="again-button">Find another conversation <span>↗</span></button>
+      <button class="primary-button" id="again-button">Find another conversation <span aria-hidden="true">↗</span></button>
     </section>
+
     <footer class="site-footer">
       <span>WEILCHAT / BETA</span><span>BE KIND. STAY ANONYMOUS.</span>
     </footer>
   </main>
+
   <dialog id="report-dialog">
     <form method="dialog" class="report-form">
       <p class="eyebrow">COMMUNITY SAFETY</p><h2>What happened?</h2>
