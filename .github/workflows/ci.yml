@@ -4,7 +4,7 @@ on:
   pull_request:
     branches: [main]
   push:
-    branches: [main]
+    branches: [main, "hardening/**"]
 
 permissions:
   contents: read
@@ -14,7 +14,7 @@ jobs:
     name: Unit and Redis integration tests
     runs-on: ubuntu-latest
     env:
-      REDIS_TEST_URL: \${{ secrets.REDIS_TEST_URL }}
+      REDIS_TEST_URL: ${{ secrets.REDIS_TEST_URL }}
     steps:
       - name: Check out repository
         uses: actions/checkout@v4
@@ -28,7 +28,7 @@ jobs:
       - name: Run unit and local integration tests
         run: npm test
       - name: Run cross-instance Redis integration test
-        if: \${{ env.REDIS_TEST_URL != '' }}
+        if: ${{ env.REDIS_TEST_URL != '' }}
         run: npm run test:redis
 
   browser:
