@@ -1,9 +1,18 @@
 import http from "node:http";
+import { randomUUID } from "node:crypto";
 import { Server } from "socket.io";
 import Redis from "ioredis";
 import { createAdapter } from "@socket.io/redis-adapter";
 import { isValidMatchSelection } from "../public/matchmaking.js";
 import { SOCKET_SERVER_PATH } from "../public/socket-config.js";
+import {
+  clientAddress,
+  createRateLimiter,
+  hashClientAddress,
+  validateMatchPayload,
+  validateMessagePayload,
+  validateReportPayload
+} from "./security.js";
 
 export { SOCKET_SERVER_PATH };
 
@@ -30,7 +39,9 @@ if (redisUrl) {
   io.adapter(createAdapter(publisher, subscriber));
 }
 
-const prefix = "weilchat:v1:";
+const prefix = process.env.WEILCHAT_REDIS_PREFIX || "weilchat:v1:";
+const rateLimit = createRateLimiter({ redis, prefix, secret: redisUrl || "weilchat-local" });
+const localReports = [];
 const userKey = (id) => prefix + "user:" + id;
 const queueKey = (gender, preference) => prefix + "queue:" + gender + ":" + preference;
 
@@ -83,7 +94,7 @@ return {peer or "", status or "idle"}
 
 async function findMatch(socket, gender, preference) {
   if (redis) {
-    const room = "chat:" + crypto.randomUUID();
+    const room = "chat:" + randomUUID();
     const candidate = await redis.eval(
       matchScript,
       2,
@@ -162,11 +173,44 @@ async function leaveChat(socket, notifyPeer = true) {
   socket.data.peer = null;
 }
 
+io.use(async (socket, next) => {
+  const identity = hashClientAddress(clientAddress(socket), redisUrl || "weilchat-local");
+  socket.data.rateLimitIdentity = identity;
+  try {
+    if (!(await rateLimit("connection", identity, 40, 60))) {
+      return next(new Error("Too many connections. Please wait a minute and try again."));
+    }
+    next();
+  } catch (error) {
+    console.error("connection rate limit failed", error);
+    next(new Error("Connection is temporarily unavailable. Please try again."));
+  }
+});
+
+async function consumeEventLimit(socket, scope, max, windowSeconds) {
+  const identity = socket.data.rateLimitIdentity ||
+    hashClientAddress(clientAddress(socket), redisUrl || "weilchat-local");
+  try {
+    const allowed = await rateLimit(scope, identity, max, windowSeconds);
+    if (!allowed) socket.emit("chat-error", "You're doing that too quickly. Please wait and try again.");
+    return allowed;
+  } catch (error) {
+    console.error("event rate limit failed", error);
+    socket.emit("chat-error", "This action is temporarily unavailable. Please try again.");
+    return false;
+  }
+}
+
 io.on("connection", (socket) => {
   socket.data.lastMessageAt = 0;
 
-  socket.on("find-match", async (payload = {}) => {
+  socket.on("find-match", async (payload) => {
     try {
+      if (!validateMatchPayload(payload)) {
+        socket.emit("chat-error", "Invalid matchmaking request.");
+        return;
+      }
+      if (!(await consumeEventLimit(socket, "search", 20, 60))) return;
       if (payload.adult !== true) {
         socket.emit("chat-error", "You must confirm that you are 18 or older.");
         return;
@@ -189,10 +233,14 @@ io.on("connection", (socket) => {
     }
   });
 
-  socket.on("chat-message", async (payload = {}) => {
+  socket.on("chat-message", async (payload) => {
     const now = Date.now();
-    const message = typeof payload.text === "string" ? payload.text.trim() : "";
-    if (!message || message.length > 1000) return;
+    if (!validateMessagePayload(payload)) {
+      socket.emit("chat-error", "Messages must contain between 1 and 1000 characters.");
+      return;
+    }
+    const message = payload.text.trim();
+    if (!(await consumeEventLimit(socket, "message", 45, 60))) return;
     if (now - socket.data.lastMessageAt < 650) {
       socket.emit("chat-error", "Slow down a little.");
       return;
@@ -201,15 +249,22 @@ io.on("connection", (socket) => {
     try {
       const peerId = redis ? await redis.hget(userKey(socket.id), "peer") : socket.data.peer;
       const status = redis ? await redis.hget(userKey(socket.id), "status") : (peerId ? "matched" : "idle");
-      if (status === "matched" && peerId) {
-        io.to(peerId).emit("chat-message", { from: "Stranger", text: message, timestamp: Date.now() });
+      if (status !== "matched" || !peerId) {
+        socket.emit("chat-error", "You are not in an active chat.");
+        return;
       }
+      io.to(peerId).emit("chat-message", { from: "Stranger", text: message, timestamp: Date.now() });
     } catch (error) {
       console.error("message relay error", error);
     }
   });
 
-  socket.on("next", async () => {
+  socket.on("next", async (payload) => {
+    if (payload !== undefined) {
+      socket.emit("chat-error", "Invalid request.");
+      return;
+    }
+    if (!(await consumeEventLimit(socket, "next", 30, 60))) return;
     try {
       await leaveChat(socket, true);
       socket.emit("chat-reset");
@@ -218,17 +273,50 @@ io.on("connection", (socket) => {
     }
   });
 
-  socket.on("report", async (payload = {}) => {
-    const reason = typeof payload.reason === "string" ? payload.reason.slice(0, 120) : "Other";
+  socket.on("report", async (payload) => {
+    if (!validateReportPayload(payload)) {
+      socket.emit("chat-error", "Choose a valid report reason.");
+      return;
+    }
+    if (!(await consumeEventLimit(socket, "report", 3, 600))) return;
+
     try {
-      if (redis) {
-        const reported = await redis.hget(userKey(socket.id), "peer");
-        await redis.lpush(prefix + "reports", JSON.stringify({ reporter: socket.id, reported, reason, at: Date.now() }));
-        await redis.ltrim(prefix + "reports", 0, 499);
-        await redis.expire(prefix + "reports", 2592000);
+      const reported = redis
+        ? await redis.hget(userKey(socket.id), "peer")
+        : socket.data.peer;
+      const activeStatus = redis
+        ? await redis.hget(userKey(socket.id), "status")
+        : (reported ? "matched" : "idle");
+      if (activeStatus !== "matched" || !reported) {
+        socket.emit("chat-error", "You can report only an active conversation.");
+        return;
       }
-      socket.emit("report-received");
-    } catch {
+
+      const reportId = randomUUID();
+      const createdAt = Date.now();
+      if (redis) {
+        const reportKey = prefix + "report:" + reportId;
+        const reportIndex = prefix + "reports:index";
+        await redis.multi()
+          .zadd(reportIndex, String(createdAt), reportId)
+          .hset(reportKey, "reporter", socket.id, "reported", reported, "reason", payload.reason, "createdAt", String(createdAt), "status", "open")
+          .expire(reportKey, 2592000)
+          .expire(reportIndex, 2592000)
+          .exec();
+      } else {
+        localReports.unshift({
+          id: reportId,
+          reporter: socket.id,
+          reported,
+          reason: payload.reason,
+          createdAt,
+          status: "open"
+        });
+        if (localReports.length > 500) localReports.length = 500;
+      }
+      socket.emit("report-received", { reportId });
+    } catch (error) {
+      console.error("report submission failed", error);
       socket.emit("chat-error", "Report could not be submitted right now.");
     }
   });

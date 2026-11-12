@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="robots" content="noindex,nofollow">
+  <title>Weilchat moderation</title>
+  <style>
+    :root{font-family:Inter,ui-sans-serif,system-ui,sans-serif;color:#151629;background:#fcfbff}
+    *{box-sizing:border-box}body{margin:0;padding:32px 20px}
+    main{max-width:960px;margin:0 auto}.top{display:flex;align-items:center;justify-content:space-between;gap:16px}
+    h1{font-size:28px;letter-spacing:-.04em;margin:0}.muted{color:#666783;font-size:13px}
+    .panel{margin-top:22px;padding:20px;border:1px solid #e7e5ef;border-radius:16px;background:#fff}
+    .controls{display:flex;gap:10px;flex-wrap:wrap}.controls input{flex:1;min-width:220px}
+    input,select,button{font:inherit;border:1px solid #dcd9e7;border-radius:9px;padding:10px 12px;background:#fff;color:inherit}
+    button{cursor:pointer;background:#b28fff;border-color:#b28fff;font-weight:650}
+    button.secondary{background:#fff;border-color:#dcd9e7}
+    .status{min-height:20px;margin:14px 0 0;color:#666783;font-size:13px}
+    .report{padding:17px 0;border-top:1px solid #efedf4}.report:first-child{border-top:0}
+    .report-head{display:flex;align-items:center;justify-content:space-between;gap:12px}
+    .reason{font-weight:700;text-transform:capitalize}.meta{margin:7px 0;color:#777694;font-size:12px}
+    .actions{display:flex;gap:8px}.actions button{font-size:12px;padding:7px 10px}
+    .empty{padding:24px 0;color:#777694;text-align:center}
+    @media(max-width:600px){.top{align-items:flex-start;flex-direction:column}.report-head{align-items:flex-start;flex-direction:column}}
+  </style>
+</head>
+<body>
+  <main>
+    <div class="top"><h1>Weilchat moderation</h1><span class="muted">Private review queue</span></div>
+    <section class="panel">
+      <div class="controls">
+        <input id="token" type="password" autocomplete="current-password" placeholder="Moderation access token" aria-label="Moderation access token">
+        <select id="status" aria-label="Report status"><option value="open">Open reports</option><option value="resolved">Resolved</option><option value="dismissed">Dismissed</option><option value="all">All reports</option></select>
+        <button id="load">Load reports</button>
+      </div>
+      <p id="status-message" class="status" role="status">Enter your access token to review reports. The token stays in this tab only.</p>
+      <div id="reports"></div>
+    </section>
+  </main>
+  <script type="module" src="/moderation.js"></script>
+</body>
+</html>
