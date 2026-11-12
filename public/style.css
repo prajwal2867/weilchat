@@ -92,9 +92,14 @@ main { width: min(100%, 1144px); margin: 0 auto; }
 .message-form button { padding: 10px 17px; border: 0; border-radius: 20px; background: #b28fff; color: var(--ink); font-size: 12px; font-weight: 750; cursor: pointer; }
 .chat-actions { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 15px 28px 19px; }
 .danger { color: #a84d70; }
-.site-footer { width: calc(100% + 16px); margin-left: 22px; display: flex; justify-content: space-between; gap: 12px; margin-top: 0; padding: 18px 1px 22px; border-top: 1px solid var(--line); color: var(--quiet); font-size: 10px; font-weight: 700; letter-spacing: .09em; }
 dialog { width: min(calc(100% - 32px), 440px); padding: 0; border: 1px solid var(--line); border-radius: 20px; background: #fff; color: var(--ink); box-shadow: 0 25px 90px #24122d26; }
 dialog::backdrop { background: #21132c55; backdrop-filter: blur(4px); }
+#adult-dialog { width: min(calc(100% - 32px), 550px); border-radius: 24px; }
+#adult-dialog .report-form { gap: 18px; padding: 36px; }
+#adult-dialog .eyebrow { font-size: 13px; }
+#adult-dialog h2 { font-size: 32px; line-height: 1.2; letter-spacing: -.04em; }
+#adult-dialog .muted { font-size: 18px; line-height: 1.5; }
+#adult-dialog .dialog-actions .text-button { padding: 9px 14px; border-radius: 9px; background: #f0eff4; font-size: 14px; }
 .report-form { display: grid; gap: 16px; padding: 28px; }
 .report-form .eyebrow, .report-form h2 { margin: 0; }
 .report-form h2 { color: var(--ink); }
@@ -121,7 +126,6 @@ dialog::backdrop { background: #21132c55; backdrop-filter: blur(4px); }
   .intro { font-size: 15px; }
   .desktop-break { display: none; }
   .conversation-art { height: 430px; }
-  .site-footer { width: 100%; margin-top: 8px; margin-left: 0; }
 }
 @media (max-width: 480px) {
   body { padding: 0 17px calc(12px + env(safe-area-inset-bottom)); }
@@ -144,7 +148,6 @@ dialog::backdrop { background: #21132c55; backdrop-filter: blur(4px); }
   .message-form { margin: 0 10px; padding: 8px 10px; gap: 8px; }
   .message-form button { padding: 10px 12px; }
   .chat-status { padding-left: 16px; }
-  .site-footer { flex-wrap: wrap; font-size: 9px; }
   .report-form { padding: 23px; }
   .state-screen { min-height: 60vh; padding: 75px 2px; }
 }
