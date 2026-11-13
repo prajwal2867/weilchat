@@ -26,6 +26,8 @@ function syncChatViewport(){
   const viewport=window.visualViewport;
   const height=viewport?viewport.height:window.innerHeight;
   const top=viewport?viewport.offsetTop:0;
+  const keyboardOpen=!!viewport&&window.innerHeight-height>120;
+  document.body.classList.toggle("keyboard-open",keyboardOpen);
   document.documentElement.style.setProperty("--chat-visible-height",`${Math.round(height)}px`);
   document.documentElement.style.setProperty("--chat-visible-top",`${Math.round(top)}px`);
 }
