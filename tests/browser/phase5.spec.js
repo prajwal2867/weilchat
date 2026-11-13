@@ -1,6 +1,7 @@
 import { test, expect } from "@playwright/test";
 
 async function enterSearch(page, gender = "man") {
+  await expect(page.locator("#connection-label")).toHaveText("ONLINE", { timeout: 15000 });
   if (gender === "woman") {
     await page.locator("label.choice").filter({ hasText: "Female" }).click();
   }
@@ -90,7 +91,7 @@ test("mobile layout keeps chat, message controls, and report dialog inside the v
       document: document.documentElement.scrollWidth,
       chat: document.querySelector("#chat").getBoundingClientRect().toJSON(),
       input: document.querySelector("#message-input").getBoundingClientRect().toJSON(),
-      send: document.querySelector(".message-form button").getBoundingClientRect().toJSON()
+      send: document.querySelector('.message-form button[type=submit]').getBoundingClientRect().toJSON(),
     }));
     expect(initialMetrics.document).toBeLessThanOrEqual(initialMetrics.viewport);
     expect(initialMetrics.chat.left).toBeGreaterThanOrEqual(0);
@@ -99,9 +100,10 @@ test("mobile layout keeps chat, message controls, and report dialog inside the v
     expect(initialMetrics.send.width).toBeGreaterThan(45);
 
     await mobilePage.locator("#message-input").fill("Mobile browser says hello");
-    await mobilePage.locator(".message-form button").click();
-    await expect(desktopPage.locator("#messages .message:not(.mine) p")).toHaveText("Mobile browser says hello");
+    await mobilePage.locator('.message-form button[type=submit]').click();
+    await expect(desktopPage.locator("#messages .message-row:not(.mine) .message-bubble p")).toHaveText("Mobile browser says hello");
 
+    await mobilePage.locator("#profile-button").click();
     await mobilePage.locator("#report-button").click();
     await expect(mobilePage.locator("#report-dialog")).toBeVisible();
     const dialog = await mobilePage.locator("#report-dialog").boundingBox();

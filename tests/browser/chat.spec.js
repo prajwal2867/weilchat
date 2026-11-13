@@ -12,6 +12,8 @@ test("two separate browser sessions can match, chat, report, and leave", async (
       pageB.goto("/")
     ]);
 
+    await expect(pageA.locator("#connection-label")).toHaveText("ONLINE", { timeout: 15000 });
+    await expect(pageB.locator("#connection-label")).toHaveText("ONLINE", { timeout: 15000 });
     await pageB.locator("label.choice").filter({ hasText: "Female" }).click();
 
     await pageA.locator("#start-button").click();
@@ -25,18 +27,20 @@ test("two separate browser sessions can match, chat, report, and leave", async (
     await expect(pageB.locator("#chat")).toBeVisible();
 
     await pageA.locator("#message-input").fill("Hello from browser A");
-    await pageA.locator("#message-form button").click();
-    await expect(pageB.locator("#messages .message:not(.mine) p")).toHaveText("Hello from browser A");
+    await pageA.locator('#message-form button[type=submit]').click();
+    await expect(pageB.locator("#messages .message-row:not(.mine) .message-bubble p")).toHaveText("Hello from browser A");
 
     await pageB.locator("#message-input").fill("Hello back from browser B");
-    await pageB.locator("#message-form button").click();
-    await expect(pageA.locator("#messages .message:not(.mine) p")).toHaveText("Hello back from browser B");
+    await pageB.locator('#message-form button[type=submit]').click();
+    await expect(pageA.locator("#messages .message-row:not(.mine) .message-bubble p")).toHaveText("Hello back from browser B");
 
+    await pageA.locator("#profile-button").click();
     await pageA.locator("#report-button").click();
     await pageA.locator("#submit-report").click();
     await expect(pageA.locator("#chat-status")).toContainText("Report received");
     await expect(pageA.locator("#report-dialog")).not.toBeVisible();
 
+    await pageA.locator("#profile-button").click();
     await pageA.locator("#next-button").click();
     await expect(pageA.locator("#searching")).toBeVisible();
     await expect(pageB.locator("#ended")).toBeVisible();
