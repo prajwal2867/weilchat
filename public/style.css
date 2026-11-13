@@ -160,7 +160,6 @@ body.chat-mode main { width: 100%; max-width: none; height: 100vh; height: 100dv
 .messages { min-height: 300px; max-height: 52vh; padding: 25px 28px; display: flex; flex-direction: column; gap: 13px; overflow-y: auto; }
 .message { max-width: min(82%, 560px); padding: 12px 15px; overflow-wrap: anywhere; border: 1px solid #efedf4; border-radius: 15px 15px 15px 5px; background: #f8f7fb; }
 .message.mine { align-self: flex-end; border: 0; border-radius: 15px 15px 5px 15px; background: #eee4ff; color: #4f3678; }
-.message-meta { display: block; margin-bottom: 5px; color: #8c8798; font-size: 10px; font-weight: 700; letter-spacing: .05em; }
 .message p { margin: 0; white-space: pre-wrap; line-height: 1.5; }
 .chat-status { min-height: 20px; margin: 0; padding: 0 28px 14px; color: var(--muted); font-size: 12px; }
 .message-form { display: flex; align-items: center; gap: 13px; margin: 0 18px; padding: 9px 12px 9px 15px; border: 1px solid var(--line); border-radius: 25px; background: #fff; }
@@ -388,7 +387,10 @@ dialog::backdrop { background: #21132c55; backdrop-filter: blur(4px); }
 #messages .message-meta,
 #messages .message-footer,
 #messages .message-time,
-#messages .message-sent { display: none !important; }
+#messages .message-sent,
+#messages [class*="timestamp"],
+#messages [class*="checkmark"],
+#messages [class*="delivery-status"] { display: none !important; }
 
 /* Keep the composer tucked right above the native keyboard, without the normal bottom breathing room. */
 @media (max-width: 760px) {
