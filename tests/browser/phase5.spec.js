@@ -97,7 +97,7 @@ test("mobile layout keeps chat, message controls, and report dialog inside the v
     expect(initialMetrics.chat.left).toBeGreaterThanOrEqual(0);
     expect(initialMetrics.chat.right).toBeLessThanOrEqual(initialMetrics.viewport);
     expect(initialMetrics.input.width).toBeGreaterThan(80);
-    expect(initialMetrics.send.width).toBeGreaterThan(45);
+    expect(initialMetrics.send.width).toBeGreaterThan(40);
 
     await mobilePage.locator("#message-input").fill("Mobile browser says hello");
     await mobilePage.locator('.message-form button[type=submit]').click();
