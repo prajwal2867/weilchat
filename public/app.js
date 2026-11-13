@@ -16,7 +16,8 @@ const screens = ["welcome", "searching", "chat", "ended"];
 let matched = false;
 let reconnectTimer;
 let autoRematch = false;
-let adultConfirmed = false;
+const ADULT_CONFIRMATION_KEY = "weilchat:adult-confirmed:v1";
+let adultConfirmed = localStorage.getItem(ADULT_CONFIRMATION_KEY) === "true";
 let reportPending = false;
 function show(name){for(const id of screens)$(id).classList.toggle("hidden",id!==name);document.body.classList.toggle("searching-mode",name==="searching");document.body.classList.toggle("chat-mode",name==="chat");if(name!=="chat")closeProfileMenu()}
 function closeProfileMenu(){$("profile-menu").classList.add("hidden");$("profile-button").setAttribute("aria-expanded","false")}
@@ -42,7 +43,7 @@ function startMatch(){
 }
 function requestMatch(){if(adultConfirmed)startMatch();else $("adult-dialog").showModal()}
 $("start-form").addEventListener("submit",event=>{event.preventDefault();requestMatch()});
-$("confirm-adult").addEventListener("click",()=>{adultConfirmed=true;startMatch()});
+$("confirm-adult").addEventListener("click",()=>{adultConfirmed=true;localStorage.setItem(ADULT_CONFIRMATION_KEY,"true");startMatch()});
 $("profile-button").addEventListener("click",()=>{const open=$("profile-menu").classList.toggle("hidden")===false;$("profile-button").setAttribute("aria-expanded",String(open))});
 document.querySelectorAll(".chat-nav-item").forEach(item=>item.addEventListener("click",()=>{document.querySelectorAll(".chat-nav-item").forEach(navItem=>{navItem.classList.remove("active");navItem.removeAttribute("aria-current")});item.classList.add("active");item.setAttribute("aria-current","page")}));
 document.querySelectorAll(".recent-chat").forEach(item=>item.addEventListener("click",()=>{document.querySelectorAll(".recent-chat").forEach(chat=>{chat.classList.remove("active");chat.removeAttribute("aria-current")});item.classList.add("active");item.setAttribute("aria-current","page");$("chat-title").textContent=item.dataset.chatTitle}));
