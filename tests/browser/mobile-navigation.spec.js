@@ -19,12 +19,14 @@ test("mobile chat fills the viewport and exposes sidebar tools in the overflow m
     await expect(menu.getByText(label, { exact: true })).toBeVisible();
   }
 
-  await menu.locator(".recent-chat").filter({ hasText: "Study Plan" }).click();
-  await expect(page.locator("#chat-title")).toHaveText("Study Plan");
-  await expect(menu).toBeVisible();
-
   await expect(menu.locator(".promo-link")).toBeVisible();
 
+  await menu.locator(".recent-chat").filter({ hasText: "Study Plan" }).click();
+  await expect(page.locator("#chat-title")).toHaveText("Study Plan");
+  await expect(menu).toBeHidden();
+
+  await page.locator("#profile-button").click();
+  await expect(menu).toBeVisible();
   await page.locator("#profile-button").click();
   await expect(menu).toBeHidden();
 });

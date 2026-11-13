@@ -20,7 +20,7 @@ const ADULT_CONFIRMATION_KEY = "weilchat:adult-confirmed:v1";
 let adultConfirmed = localStorage.getItem(ADULT_CONFIRMATION_KEY) === "true";
 let reportPending = false;
 function show(name){for(const id of screens)$(id).classList.toggle("hidden",id!==name);document.body.classList.toggle("searching-mode",name==="searching");document.body.classList.toggle("chat-mode",name==="chat");if(name!=="chat")closeProfileMenu()}
-function closeProfileMenu(){$("profile-menu").classList.add("hidden");$("profile-button").setAttribute("aria-expanded","false")}
+function closeProfileMenu(){$("profile-menu").classList.add("hidden");$("profile-button").setAttribute("aria-expanded","false");$("profile-button").setAttribute("aria-label",matchMedia("(max-width: 760px)").matches?"Open chat menu":"Conversation options")}
 function setConnection(connected){$("connection-label").textContent=connected?"ONLINE":"RECONNECTING";document.querySelector(".header-meta .live-dot").style.background=connected?"#9c78f4":"#888"}
 function addMessage(text,mine=false,timestamp=Date.now()){
   const row=document.createElement("article");row.className="message-row"+(mine?" mine":"");
@@ -44,7 +44,9 @@ function startMatch(){
 function requestMatch(){if(adultConfirmed)startMatch();else $("adult-dialog").showModal()}
 $("start-form").addEventListener("submit",event=>{event.preventDefault();requestMatch()});
 $("confirm-adult").addEventListener("click",()=>{adultConfirmed=true;localStorage.setItem(ADULT_CONFIRMATION_KEY,"true");startMatch()});
-$("profile-button").addEventListener("click",()=>{const open=$("profile-menu").classList.toggle("hidden")===false;$("profile-button").setAttribute("aria-expanded",String(open))});
+$("profile-button").addEventListener("click",()=>{const open=$("profile-menu").classList.toggle("hidden")===false;$("profile-button").setAttribute("aria-expanded",String(open));$("profile-button").setAttribute("aria-label",open&&matchMedia("(max-width: 760px)").matches?"Close chat menu":matchMedia("(max-width: 760px)").matches?"Open chat menu":"Conversation options")});
+document.addEventListener("click",event=>{if(!$("profile-menu").classList.contains("hidden")&&!$("profile-menu").contains(event.target)&&!$("profile-button").contains(event.target))closeProfileMenu()});
+document.addEventListener("keydown",event=>{if(event.key==="Escape"&&!$("profile-menu").classList.contains("hidden"))closeProfileMenu()});
 // Reuse the sidebar content in the mobile overflow menu without changing desktop navigation.
 const mobileSidebarMenu=$("mobile-sidebar-menu");
 mobileSidebarMenu.innerHTML=$("chat").querySelector(".chat-sidebar").innerHTML;
@@ -56,9 +58,9 @@ mobileSidebarMenu.addEventListener("click",event=>{
   const clearButton=event.target.closest("[data-mobile-clear-recent]");
   if(clearButton){$("recent-chat-list").replaceChildren();mobileSidebarMenu.querySelector(".recent-chat-list")?.replaceChildren();return}
   const navItem=event.target.closest(".chat-nav-item");
-  if(navItem){mobileSidebarMenu.querySelectorAll(".chat-nav-item").forEach(item=>{item.classList.remove("active");item.removeAttribute("aria-current")});navItem.classList.add("active");navItem.setAttribute("aria-current","page");return}
+  if(navItem){mobileSidebarMenu.querySelectorAll(".chat-nav-item").forEach(item=>{item.classList.remove("active");item.removeAttribute("aria-current")});navItem.classList.add("active");navItem.setAttribute("aria-current","page");closeProfileMenu();return}
   const recentItem=event.target.closest(".recent-chat");
-  if(recentItem){mobileSidebarMenu.querySelectorAll(".recent-chat").forEach(item=>{item.classList.remove("active");item.removeAttribute("aria-current")});recentItem.classList.add("active");recentItem.setAttribute("aria-current","page");$("chat-title").textContent=recentItem.dataset.chatTitle;return}
+  if(recentItem){mobileSidebarMenu.querySelectorAll(".recent-chat").forEach(item=>{item.classList.remove("active");item.removeAttribute("aria-current")});recentItem.classList.add("active");recentItem.setAttribute("aria-current","page");$("chat-title").textContent=recentItem.dataset.chatTitle;closeProfileMenu();return}
   if(event.target.closest(".promo-link"))closeProfileMenu();
 });
 document.querySelectorAll(".chat-nav-item").forEach(item=>item.addEventListener("click",()=>{document.querySelectorAll(".chat-nav-item").forEach(navItem=>{navItem.classList.remove("active");navItem.removeAttribute("aria-current")});item.classList.add("active");item.setAttribute("aria-current","page")}));
