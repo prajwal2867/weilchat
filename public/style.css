@@ -267,3 +267,32 @@ dialog::backdrop { background: #21132c55; backdrop-filter: blur(4px); }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { scroll-behavior: auto !important; animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
 }
+/* Mobile chat uses the full viewport; sidebar tools live in the overflow menu. */
+.mobile-menu-divider, .mobile-sidebar-menu { display: none; }
+@media (max-width: 760px) {
+  .chat-sidebar { display: none; }
+  .chat-workspace { width: 100%; min-width: 0; }
+  .chat-app-header { margin-left: 12px; margin-right: 12px; }
+  .profile-menu { width: min(320px, calc(100vw - 24px)); max-height: min(72dvh, 620px); overflow-y: auto; overscroll-behavior: contain; }
+  .mobile-menu-divider { display: block; height: 1px; margin: 5px 4px; background: var(--line); }
+  .mobile-sidebar-menu { display: grid; gap: 12px; padding: 6px 4px 4px; }
+  .mobile-sidebar-menu .chat-brand { display: flex; align-items: center; gap: 10px; padding: 4px 7px 9px; border-bottom: 1px solid var(--line); font-size: 17px; }
+  .mobile-sidebar-menu .chat-brand .brand-mark { width: 30px; height: 30px; border-radius: 9px; font-size: 18px; }
+  .mobile-sidebar-menu .chat-brand-name { display: inline; }
+  .mobile-sidebar-menu .chat-nav { display: grid; gap: 3px; margin: 0; }
+  .mobile-sidebar-menu .chat-nav-item { min-height: 42px; padding: 0 10px; justify-content: flex-start; gap: 12px; font-size: 14px; }
+  .mobile-sidebar-menu .chat-nav-item span { display: inline; }
+  .mobile-sidebar-menu .chat-nav-item svg { width: 20px; height: 20px; flex-basis: 20px; }
+  .mobile-sidebar-menu .recent-chats { display: block; margin: 0; padding-top: 10px; border-top: 1px solid var(--line); }
+  .mobile-sidebar-menu .recent-chats-heading { margin: 0 5px 7px; }
+  .mobile-sidebar-menu .recent-chats-heading h2 { font-size: 12px; }
+  .mobile-sidebar-menu .recent-chat { min-height: 38px; font-size: 13px; }
+  .mobile-sidebar-menu .chat-promo { display: block; min-height: 0; margin: 0; padding: 12px; }
+  .mobile-sidebar-menu .chat-promo p { max-width: 220px; }
+  .chat-messages { flex: 1 1 auto; }
+}
+@media (max-width: 480px) {
+  .chat-sidebar { display: none; }
+  .chat-app-header { margin: 0 10px; padding: 0 4px; }
+  .chat-workspace .chat-composer { margin-bottom: max(10px, env(safe-area-inset-bottom)); }
+}
