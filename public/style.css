@@ -382,3 +382,15 @@ dialog::backdrop { background: #21132c55; backdrop-filter: blur(4px); }
 @media (prefers-reduced-motion: reduce) {
   .profile-menu, .profile-menu.hidden { transition: none; }
 }
+
+
+/* Message rows contain only the message bubble: suppress legacy delivery metadata if an old client inserts it. */
+#messages .message-meta,
+#messages .message-footer,
+#messages .message-time,
+#messages .message-sent { display: none !important; }
+
+/* Keep the composer tucked right above the native keyboard, without the normal bottom breathing room. */
+@media (max-width: 760px) {
+  body.chat-mode.keyboard-open .chat-workspace .chat-composer { margin-bottom: 2px !important; }
+}

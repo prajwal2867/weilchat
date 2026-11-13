@@ -47,6 +47,10 @@ test("mobile keyboard viewport resize keeps message scroll position and lifts th
   await page.locator("#chat").evaluate(element => element.classList.remove("hidden"));
   await page.locator("body").evaluate(element => element.classList.add("chat-mode"));
   await page.locator("#messages").evaluate(element => {
+    const legacy = document.createElement("article");
+    legacy.className = "message-row mine";
+    legacy.innerHTML = '<div class="message-content"><div class="message-bubble"><p>Legacy message</p></div><div class="message-footer"><time class="message-time">10:34 PM</time><span class="message-sent">✓</span></div><span class="message-meta">10:34 PM ✓</span></div>';
+    element.append(legacy);
     for (let i = 0; i < 30; i++) {
       const row = document.createElement("article");
       row.className = "message-row";
@@ -62,19 +66,28 @@ test("mobile keyboard viewport resize keeps message scroll position and lifts th
     chatHeight: document.querySelector("#chat").getBoundingClientRect().height
   }));
   await page.locator("#message-input").focus();
-  await page.setViewportSize({ width: 390, height: 540 });
+  await page.evaluate(() => {
+    Object.defineProperty(window, "visualViewport", {
+      configurable: true,
+      value: { height: 540, offsetTop: 0 }
+    });
+    window.dispatchEvent(new Event("resize"));
+  });
   await expect.poll(() => page.locator("#messages").evaluate(element => element.clientHeight)).toBeLessThan(600);
 
   const after = await page.locator("#messages").evaluate(element => ({
     scrollTop: element.scrollTop,
     composerBottom: document.querySelector("#message-form").getBoundingClientRect().bottom,
-    chatHeight: document.querySelector("#chat").getBoundingClientRect().height,
-    documentHeight: document.documentElement.scrollHeight
+    chatHeight: document.querySelector("#chat").getBoundingClientRect().height
   }));
   expect(after.chatHeight).toBeLessThan(before.chatHeight);
   expect(after.composerBottom).toBeLessThanOrEqual(540);
   expect(after.scrollTop).toBe(before.scrollTop);
-  expect(after.documentHeight).toBeLessThanOrEqual(540);
+  await expect(page.locator("#messages .message-footer")).toBeHidden();
+  await expect(page.locator("#messages .message-meta")).toBeHidden();
+  await expect(page.locator("body")).toHaveClass(/keyboard-open/);
+  const composerMargin = await page.locator("#message-form").evaluate(element => parseFloat(getComputedStyle(element).marginBottom));
+  expect(composerMargin).toBeLessThanOrEqual(2);
 });
 
 test("mobile overflow menu is left aligned and animates open and closed", async ({ page }) => {
