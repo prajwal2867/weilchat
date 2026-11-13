@@ -45,6 +45,22 @@ function requestMatch(){if(adultConfirmed)startMatch();else $("adult-dialog").sh
 $("start-form").addEventListener("submit",event=>{event.preventDefault();requestMatch()});
 $("confirm-adult").addEventListener("click",()=>{adultConfirmed=true;localStorage.setItem(ADULT_CONFIRMATION_KEY,"true");startMatch()});
 $("profile-button").addEventListener("click",()=>{const open=$("profile-menu").classList.toggle("hidden")===false;$("profile-button").setAttribute("aria-expanded",String(open))});
+// Reuse the sidebar content in the mobile overflow menu without changing desktop navigation.
+const mobileSidebarMenu=$("mobile-sidebar-menu");
+mobileSidebarMenu.innerHTML=$("chat").querySelector(".chat-sidebar").innerHTML;
+mobileSidebarMenu.querySelectorAll("[id]").forEach(element=>element.removeAttribute("id"));
+mobileSidebarMenu.querySelectorAll("a").forEach(link=>{link.removeAttribute("href");link.setAttribute("role","button")});
+mobileSidebarMenu.querySelectorAll(".recent-chat").forEach(item=>item.setAttribute("type","button"));
+mobileSidebarMenu.querySelectorAll(".recent-chats-heading button").forEach(button=>button.dataset.mobileClearRecent="true");
+mobileSidebarMenu.addEventListener("click",event=>{
+  const clearButton=event.target.closest("[data-mobile-clear-recent]");
+  if(clearButton){$("recent-chat-list").replaceChildren();mobileSidebarMenu.querySelector(".recent-chat-list")?.replaceChildren();return}
+  const navItem=event.target.closest(".chat-nav-item");
+  if(navItem){mobileSidebarMenu.querySelectorAll(".chat-nav-item").forEach(item=>{item.classList.remove("active");item.removeAttribute("aria-current")});navItem.classList.add("active");navItem.setAttribute("aria-current","page");return}
+  const recentItem=event.target.closest(".recent-chat");
+  if(recentItem){mobileSidebarMenu.querySelectorAll(".recent-chat").forEach(item=>{item.classList.remove("active");item.removeAttribute("aria-current")});recentItem.classList.add("active");recentItem.setAttribute("aria-current","page");$("chat-title").textContent=recentItem.dataset.chatTitle;return}
+  if(event.target.closest(".promo-link"))closeProfileMenu();
+});
 document.querySelectorAll(".chat-nav-item").forEach(item=>item.addEventListener("click",()=>{document.querySelectorAll(".chat-nav-item").forEach(navItem=>{navItem.classList.remove("active");navItem.removeAttribute("aria-current")});item.classList.add("active");item.setAttribute("aria-current","page")}));
 document.querySelectorAll(".recent-chat").forEach(item=>item.addEventListener("click",()=>{document.querySelectorAll(".recent-chat").forEach(chat=>{chat.classList.remove("active");chat.removeAttribute("aria-current")});item.classList.add("active");item.setAttribute("aria-current","page");$("chat-title").textContent=item.dataset.chatTitle}));
 $("clear-recent").addEventListener("click",()=>{$("recent-chat-list").replaceChildren()});
