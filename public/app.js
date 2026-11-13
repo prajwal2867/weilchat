@@ -21,18 +21,28 @@ let adultConfirmed = localStorage.getItem(ADULT_CONFIRMATION_KEY) === "true";
 let reportPending = false;
 function show(name){for(const id of screens)$(id).classList.toggle("hidden",id!==name);document.body.classList.toggle("searching-mode",name==="searching");document.body.classList.toggle("chat-mode",name==="chat");if(name!=="chat")closeProfileMenu()}
 function closeProfileMenu(){$("profile-menu").classList.add("hidden");$("profile-button").setAttribute("aria-expanded","false");$("profile-button").setAttribute("aria-label",matchMedia("(max-width: 760px)").matches?"Open chat menu":"Conversation options")}
+function syncChatViewport(){
+  if(!matchMedia("(max-width: 760px)").matches||!document.body.classList.contains("chat-mode"))return;
+  const viewport=window.visualViewport;
+  const height=viewport?viewport.height:window.innerHeight;
+  const top=viewport?viewport.offsetTop:0;
+  document.documentElement.style.setProperty("--chat-visible-height",`${Math.round(height)}px`);
+  document.documentElement.style.setProperty("--chat-visible-top",`${Math.round(top)}px`);
+}
+window.visualViewport?.addEventListener("resize",syncChatViewport,{passive:true});
+window.visualViewport?.addEventListener("scroll",syncChatViewport,{passive:true});
+window.addEventListener("resize",syncChatViewport,{passive:true});
+window.addEventListener("orientationchange",syncChatViewport,{passive:true});
+const viewportObserver=new MutationObserver(syncChatViewport);
+viewportObserver.observe(document.body,{attributes:true,attributeFilter:["class"]});
 function setConnection(connected){$("connection-label").textContent=connected?"ONLINE":"RECONNECTING";document.querySelector(".header-meta .live-dot").style.background=connected?"#9c78f4":"#888"}
-function addMessage(text,mine=false,timestamp=Date.now()){
+function addMessage(text,mine=false){
   const row=document.createElement("article");row.className="message-row"+(mine?" mine":"");
   const avatar=document.createElement("span");avatar.className="message-avatar";avatar.setAttribute("aria-hidden","true");avatar.innerHTML='<svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="3.5"/><path d="M5.5 20a6.5 6.5 0 0 1 13 0"/></svg>';
   const content=document.createElement("div");content.className="message-content";
   const bubble=document.createElement("div");bubble.className="message-bubble";
   const body=document.createElement("p");body.textContent=text;bubble.append(body);
-  const footer=document.createElement("div");footer.className="message-footer";
-  const time=document.createElement("time");time.className="message-time";time.dateTime=new Date(timestamp).toISOString();time.textContent=new Date(timestamp).toLocaleTimeString([],{hour:"numeric",minute:"2-digit"});
-  footer.append(time);
-  if(mine){const sent=document.createElement("span");sent.className="message-sent";sent.setAttribute("aria-label","Sent");sent.textContent="✓";footer.append(sent)}
-  content.append(bubble,footer);
+  content.append(bubble);
   if(mine)row.append(content,avatar);else row.append(avatar,content);
   $("messages").append(row);$("messages").scrollTop=$("messages").scrollHeight;
 }
@@ -74,8 +84,8 @@ $("next-button").addEventListener("click",()=>{closeProfileMenu();autoRematch=tr
 $("submit-report").addEventListener("click",event=>{event.preventDefault();if(reportPending)return;const reason=document.querySelector('input[name="reason"]:checked').value;reportPending=true;$("submit-report").disabled=true;$("chat-status").textContent="Submitting your report...";socket.emit("report",{reason});});
 socket.on("connect",()=>{clearTimeout(reconnectTimer);setConnection(true);if(!$("searching").classList.contains("hidden"))startMatch()});
 socket.on("disconnect",()=>{setConnection(false);if(matched){matched=false;show("ended");$("chat-status").textContent="Connection interrupted. Start a new chat when you're ready."}});
-socket.on("matched",()=>{clearTimeout(reconnectTimer);matched=true;$("messages").replaceChildren();$("chat-status").textContent="You're connected. Say hello.";show("chat");$("message-input").focus()});
-socket.on("chat-message",message=>addMessage(message.text,false,message.timestamp));
+socket.on("matched",()=>{clearTimeout(reconnectTimer);matched=true;$("messages").replaceChildren();$("chat-status").textContent="You're connected. Say hello.";show("chat")});
+socket.on("chat-message",message=>addMessage(message.text,false));
 socket.on("partner-left",()=>{matched=false;$("chat-status").textContent="The stranger has left the conversation.";show("ended")});
 socket.on("chat-reset",()=>{matched=false;$("messages").replaceChildren();if(autoRematch){autoRematch=false;startMatch()}else show("welcome")});
 socket.on("report-received",()=>{reportPending=false;$("submit-report").disabled=false;$("report-dialog").close();$("chat-status").textContent="Report received. Thanks for helping keep Weilchat safer.";});

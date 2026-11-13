@@ -138,9 +138,6 @@ body.chat-mode main { width: 100%; max-width: none; height: 100vh; height: 100dv
 .message-bubble { max-width: 100%; padding: 10px 16px; border-radius: 18px; background: #f0ecfb; color: #202038; }
 .message-row.mine .message-bubble { background: #e5dcff; }
 .message-bubble p { margin: 0; overflow-wrap: anywhere; white-space: pre-wrap; font-size: 16px; line-height: 1.45; }
-.message-footer { display: flex; align-items: center; gap: 5px; padding: 0 4px; color: #818099; font-size: 13px; }
-.message-time { font-variant-numeric: tabular-nums; }
-.message-sent { color: #8969ec; font-size: 19px; font-weight: 700; line-height: 1; }
 .chat-workspace .chat-composer { z-index: 1; height: 72px; min-height: 72px; margin: 0 22px 38px 25px; padding: 8px 12px; gap: 17px; border: 2px solid #eee8ff; border-radius: 48px; background: #fff; box-shadow: 0 8px 28px #5c438308; }
 .chat-composer .attach-button, .chat-composer > button[type="submit"] { width: 52px; height: 52px; flex: 0 0 52px; padding: 13px; display: grid; place-items: center; border: 0; border-radius: 50%; }
 .chat-composer .attach-button { background: #f1edfc; color: #606078; opacity: 1; }
@@ -334,4 +331,54 @@ dialog::backdrop { background: #21132c55; backdrop-filter: blur(4px); }
   .chat-composer .attach-button svg, .chat-composer > button[type="submit"] svg { width: 24px; height: 24px; }
   .chat-workspace .chat-composer input { padding: 5px 0; font-size: 15px; }
   .composer-sparkle { flex: 0 0 auto; font-size: 24px; }
+}
+
+/* Keep the chat frame tied to the visible mobile viewport when the native keyboard opens. */
+@media (max-width: 760px) {
+  body.chat-mode { position: fixed; inset: 0; width: 100%; height: var(--chat-visible-height, 100dvh); min-height: 0; padding: 0; overflow: hidden; overscroll-behavior: none; }
+  body.chat-mode main { position: fixed; top: var(--chat-visible-top, 0px); right: 0; bottom: auto; left: 0; width: 100%; height: var(--chat-visible-height, 100dvh); min-height: 0; overflow: hidden; }
+  .chat-screen:not(.hidden) { height: 100%; min-height: 0; overflow: hidden; }
+  .chat-workspace { height: 100%; min-height: 0; overflow: hidden; }
+  .chat-messages { min-height: 0; flex: 1 1 0%; overflow-y: auto; overscroll-behavior: contain; overflow-anchor: none; }
+  .chat-workspace .chat-composer { flex: 0 0 auto; }
+  .message-row { gap: 7px; }
+  .message-avatar { width: 30px; height: 30px; flex-basis: 30px; }
+  .message-content { max-width: 80%; }
+  .message-bubble { padding: 8px 11px; border-radius: 15px; }
+  .message-bubble p { font-size: 13px; line-height: 1.4; }
+  .chat-title { gap: 8px; }
+  .chat-title h1 { font-size: 16px; }
+  .chat-avatar { width: 32px; height: 32px; flex-basis: 32px; }
+  .chat-app-header { height: 62px; min-height: 62px; padding: 0 10px 0 12px; }
+  .profile-button { width: 38px; height: 38px; padding: 7px; }
+  .profile-button svg { width: 20px; height: 20px; }
+  .chat-workspace .chat-composer { height: 58px; min-height: 58px; margin: 0 10px 6px; padding: 5px 6px; gap: 6px; border-width: 1.5px; border-radius: 32px; }
+  .chat-composer .attach-button, .chat-composer > button[type="submit"] { width: 42px; height: 42px; flex-basis: 42px; padding: 10px; }
+  .chat-composer .attach-button svg, .chat-composer > button[type="submit"] svg { width: 21px; height: 21px; }
+  .chat-workspace .chat-composer input { padding: 4px 0; font-size: 14px; }
+  .composer-sparkle { font-size: 20px; }
+  .profile-menu { left: 12px; right: auto; width: min(340px, calc(100vw - 24px)); transform-origin: top left; }
+}
+
+/* Animate the overflow panel in/out without removing it from the transition tree. */
+.profile-menu {
+  opacity: 1;
+  visibility: visible;
+  transform: translate3d(0, 0, 0) scale(1);
+  transform-origin: top right;
+  transition: opacity 160ms ease, transform 180ms cubic-bezier(.2,.8,.2,1), visibility 180ms;
+}
+.profile-menu.hidden {
+  display: grid !important;
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transform: translate3d(0, -7px, 0) scale(.98);
+}
+@media (max-width: 760px) {
+  .profile-menu { transform-origin: top left; transition: opacity 170ms ease, transform 190ms cubic-bezier(.2,.8,.2,1), visibility 190ms; }
+  .profile-menu.hidden { transform: translate3d(-9px, -5px, 0) scale(.985); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .profile-menu, .profile-menu.hidden { transition: none; }
 }
