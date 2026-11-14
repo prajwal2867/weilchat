@@ -54,8 +54,10 @@ function sendTyping(isTyping){if(matched)socket.emit("typing",{isTyping})}
 function stopTyping(){clearTimeout(typingStopTimer);if(lastTypingSentAt){sendTyping(false);lastTypingSentAt=0}}
 function addMessage(text,mine=false){
   setRemoteTyping(false);
+  const previousRow=$("messages").querySelector(".message-row:last-of-type");
   const row=document.createElement("article");row.className="message-row"+(mine?" mine":"");
   const avatar=document.createElement("span");avatar.className="message-avatar";avatar.setAttribute("aria-hidden","true");avatar.innerHTML='<svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="3.5"/><path d="M5.5 20a6.5 6.5 0 0 1 13 0"/></svg>';
+  if(previousRow&&previousRow.classList.contains("mine")===mine)avatar.classList.add("message-avatar-spacer");
   const content=document.createElement("div");content.className="message-content";
   const bubble=document.createElement("div");bubble.className="message-bubble";
   const body=document.createElement("p");body.textContent=text;bubble.append(body);
