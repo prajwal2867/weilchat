@@ -2,7 +2,6 @@ import { test, expect } from "@playwright/test";
 
 async function enterSearch(page, gender = "man") {
   await expect(page.locator("#connection-label")).toHaveText("ONLINE", { timeout: 15000 });
-  await page.locator("#start-conversation").click();
   if (gender === "woman") {
     await page.locator("label.choice").filter({ hasText: "Female" }).click();
   }

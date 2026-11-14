@@ -4,8 +4,6 @@ test("adult confirmation is remembered after the first acceptance", async ({ pag
   await page.goto("/");
   await expect(page.locator("#connection-label")).toHaveText("ONLINE", { timeout: 15000 });
 
-  await page.locator("#start-conversation").click();
-  await page.locator("#open-app").click();
   await page.locator("#start-button").click();
   await expect(page.locator("#adult-dialog")).toBeVisible();
   await page.locator("#confirm-adult").click();
@@ -14,7 +12,6 @@ test("adult confirmation is remembered after the first acceptance", async ({ pag
 
   await page.reload();
   await expect(page.locator("#connection-label")).toHaveText("ONLINE", { timeout: 15000 });
-  await page.locator("#start-conversation").click();
   await page.locator("#start-button").click();
 
   await expect(page.locator("#adult-dialog")).not.toBeVisible();
