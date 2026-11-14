@@ -129,7 +129,7 @@ body.chat-mode main { width: 100%; max-width: none; height: 100vh; height: 100dv
 .profile-menu button { padding: 11px 12px; border: 0; border-radius: 8px; background: transparent; color: var(--ink); text-align: left; font: inherit; font-size: 13px; cursor: pointer; }
 .profile-menu button:hover { background: #f5f1ff; }
 .profile-menu #next-button { color: #805bc9; }
-.chat-messages { z-index: 0; min-height: 0; flex: 1; padding: 22px 28px; display: flex; flex-direction: column; align-items: stretch; gap: 4px; overflow-y: auto; }
+.chat-messages { z-index: 0; min-height: 0; flex: 1; padding: 22px 28px; display: flex; flex-direction: column; align-items: stretch; gap: 15px; overflow-y: auto; }
 .message-row { width: 100%; display: flex; align-items: flex-start; gap: 13px; }
 .message-row.mine { justify-content: flex-end; }
 .message-avatar { width: 40px; height: 40px; }
@@ -325,7 +325,7 @@ dialog::backdrop { background: #21132c55; backdrop-filter: blur(4px); }
   .mobile-sidebar-menu .recent-chat-icon.brand-mark { border-radius: 6px; font-size: 15px; }
   .mobile-sidebar-menu .recent-chat-icon svg { width: 16px; height: 16px; }
   .mobile-sidebar-menu .chat-promo { min-height: 122px; padding: 12px; }
-  .chat-messages { min-height: 0; flex: 1 1 0%; padding: 14px 12px; gap: 2px; }
+  .chat-messages { min-height: 0; flex: 1 1 0%; padding: 14px 12px; gap: 15px; }
   .chat-workspace .chat-composer { height: 68px; min-height: 68px; margin: 0 12px 7px 15px; padding: 7px; gap: 7px; border-width: 2px; border-radius: 36px; }
   .chat-composer .attach-button, .chat-composer > button[type="submit"] { width: 48px; height: 48px; flex-basis: 48px; padding: 12px; }
   .chat-composer .attach-button svg, .chat-composer > button[type="submit"] svg { width: 24px; height: 24px; }

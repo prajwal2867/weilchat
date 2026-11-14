@@ -16,17 +16,21 @@ async function expectTypingIndicatorAligned(page) {
       messageAvatar.getBoundingClientRect().width +
       parseFloat(messageRowStyle.columnGap);
     const previousMessageRow = document.querySelector("#typing-indicator").previousElementSibling;
+    const previousMessageBubble = previousMessageRow.querySelector(".message-bubble");
+    const firstMessageBubble = messageRows[0].querySelector(".message-bubble");
+    const secondMessageBubble = messageRows[1].querySelector(".message-bubble");
     const bubbleRect = indicatorBubble.getBoundingClientRect();
     return {
       offset: Math.abs(bubbleRect.left - expectedLeft),
-      verticalGap: bubbleRect.top - previousMessageRow.getBoundingClientRect().bottom,
-      messageGap: messageRows[1].getBoundingClientRect().top - messageRows[0].getBoundingClientRect().bottom
+      verticalGap: bubbleRect.top - previousMessageBubble.getBoundingClientRect().bottom,
+      messageGap: secondMessageBubble.getBoundingClientRect().top - firstMessageBubble.getBoundingClientRect().bottom
     };
   });
   expect(offset.offset).toBeLessThan(1);
-  expect(offset.verticalGap).toBeGreaterThanOrEqual(0);
-  expect(offset.verticalGap).toBeLessThan(6);
-  expect(offset.messageGap).toBeLessThan(6);
+  expect(offset.verticalGap).toBeGreaterThanOrEqual(14);
+  expect(offset.verticalGap).toBeLessThan(16);
+  expect(offset.messageGap).toBeGreaterThanOrEqual(14);
+  expect(offset.messageGap).toBeLessThan(16);
 }
 
 test("two separate browser sessions can match, chat, report, and leave", async ({ browser }) => {
