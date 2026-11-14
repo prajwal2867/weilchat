@@ -182,7 +182,7 @@ test("search event rate limits are enforced per client IP", async (t) => {
 
   const errors = [];
   a.on("chat-error", (message) => errors.push(message));
-  for (let i = 0; i < 21; i++) {
+  for (let i = 0; i < 51; i++) {
     a.emit("find-match", { gender: "man", preference: "woman", adult: true });
   }
   await sleep(250);
