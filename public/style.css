@@ -129,7 +129,7 @@ body.chat-mode main { width: 100%; max-width: none; height: 100vh; height: 100dv
 .profile-menu button { padding: 11px 12px; border: 0; border-radius: 8px; background: transparent; color: var(--ink); text-align: left; font: inherit; font-size: 13px; cursor: pointer; }
 .profile-menu button:hover { background: #f5f1ff; }
 .profile-menu #next-button { color: #805bc9; }
-.chat-messages { z-index: 0; min-height: 0; flex: 1; padding: 22px 28px; display: flex; flex-direction: column; align-items: stretch; gap: 20px; overflow-y: auto; }
+.chat-messages { z-index: 0; min-height: 0; flex: 1; padding: 22px 28px; display: flex; flex-direction: column; align-items: stretch; gap: 4px; overflow-y: auto; }
 .message-row { width: 100%; display: flex; align-items: flex-start; gap: 13px; }
 .message-row.mine { justify-content: flex-end; }
 .message-avatar { width: 40px; height: 40px; }
@@ -325,7 +325,7 @@ dialog::backdrop { background: #21132c55; backdrop-filter: blur(4px); }
   .mobile-sidebar-menu .recent-chat-icon.brand-mark { border-radius: 6px; font-size: 15px; }
   .mobile-sidebar-menu .recent-chat-icon svg { width: 16px; height: 16px; }
   .mobile-sidebar-menu .chat-promo { min-height: 122px; padding: 12px; }
-  .chat-messages { min-height: 0; flex: 1 1 0%; padding: 14px 12px; }
+  .chat-messages { min-height: 0; flex: 1 1 0%; padding: 14px 12px; gap: 2px; }
   .chat-workspace .chat-composer { height: 68px; min-height: 68px; margin: 0 12px 7px 15px; padding: 7px; gap: 7px; border-width: 2px; border-radius: 36px; }
   .chat-composer .attach-button, .chat-composer > button[type="submit"] { width: 48px; height: 48px; flex-basis: 48px; padding: 12px; }
   .chat-composer .attach-button svg, .chat-composer > button[type="submit"] svg { width: 24px; height: 24px; }
@@ -401,11 +401,11 @@ dialog::backdrop { background: #21132c55; backdrop-filter: blur(4px); }
 
 /* Small three-dot typing cue, based on the supplied staggered Lottie motion. */
 .typing-indicator { display: flex; align-items: flex-end; align-self: flex-start; margin-left: 53px; min-height: 40px; }
-#messages > .typing-indicator:not(:first-child) { margin-top: -18px; }
+#messages > .typing-indicator:not(:first-child) { margin-top: -6px; }
 .typing-bubble { height: 34px; min-width: 58px; padding: 0 14px; display: inline-flex; align-items: center; justify-content: center; gap: 5px; border-radius: 17px 17px 17px 5px; background: #f0ecfb; }
 .typing-bubble i { width: 6px; height: 6px; display: block; border-radius: 50%; background: #9298a0; animation: typing-dot 1.05s ease-in-out infinite; }
 .typing-bubble i:nth-child(2) { animation-delay: .18s; }
 .typing-bubble i:nth-child(3) { animation-delay: .36s; }
 @keyframes typing-dot { 0%, 60%, 100% { transform: translateY(0); background: #aeb3ba; } 30% { transform: translateY(-5px); background: #59616b; } }
-@media (max-width: 760px) { .typing-indicator { min-height: 30px; margin-left: 37px; } .typing-bubble { height: 29px; min-width: 52px; padding: 0 12px; } .typing-bubble i { width: 5px; height: 5px; } }
+@media (max-width: 760px) { .typing-indicator { min-height: 30px; margin-left: 37px; } #messages > .typing-indicator:not(:first-child) { margin-top: -1px; } .typing-bubble { height: 29px; min-width: 52px; padding: 0 12px; } .typing-bubble i { width: 5px; height: 5px; } }
 @media (prefers-reduced-motion: reduce) { .typing-bubble i { animation: none; } }

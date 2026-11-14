@@ -10,6 +10,7 @@ async function expectTypingIndicatorAligned(page) {
     const messageAvatar = messageRow.querySelector(".message-avatar");
     const messagesStyle = getComputedStyle(messages);
     const messageRowStyle = getComputedStyle(messageRow);
+    const messageRows = document.querySelectorAll("#messages .message-row");
     const expectedLeft = messages.getBoundingClientRect().left +
       parseFloat(messagesStyle.paddingLeft) +
       messageAvatar.getBoundingClientRect().width +
@@ -18,12 +19,14 @@ async function expectTypingIndicatorAligned(page) {
     const bubbleRect = indicatorBubble.getBoundingClientRect();
     return {
       offset: Math.abs(bubbleRect.left - expectedLeft),
-      verticalGap: bubbleRect.top - previousMessageRow.getBoundingClientRect().bottom
+      verticalGap: bubbleRect.top - previousMessageRow.getBoundingClientRect().bottom,
+      messageGap: messageRows[1].getBoundingClientRect().top - messageRows[0].getBoundingClientRect().bottom
     };
   });
   expect(offset.offset).toBeLessThan(1);
   expect(offset.verticalGap).toBeGreaterThanOrEqual(0);
-  expect(offset.verticalGap).toBeLessThan(16);
+  expect(offset.verticalGap).toBeLessThan(6);
+  expect(offset.messageGap).toBeLessThan(6);
 }
 
 test("two separate browser sessions can match, chat, report, and leave", async ({ browser }) => {
