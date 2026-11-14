@@ -7,7 +7,11 @@ async function enterSearch(page, gender = "man") {
   }
   await page.locator("#start-button").click();
   await page.locator("#confirm-adult").click();
-  await expect(page.locator("#searching")).toBeVisible();
+  // A waiting peer can be matched immediately, so the searching screen may
+  // be skipped between the request and this assertion. Both states are valid.
+  await expect.poll(async () =>
+    await page.locator("#searching").isVisible() || await page.locator("#chat").isVisible()
+  ).toBe(true);
 }
 
 async function matchTwo(pageA, pageB) {
