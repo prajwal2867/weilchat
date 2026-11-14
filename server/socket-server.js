@@ -177,7 +177,7 @@ io.use(async (socket, next) => {
   const identity = hashClientAddress(clientAddress(socket), redisUrl || "weilchat-local");
   socket.data.rateLimitIdentity = identity;
   try {
-    if (!(await rateLimit("connection", identity, 40, 60))) {
+    if (!(await rateLimit("connection", identity, 50, 60))) {
       return next(new Error("Too many connections. Please wait a minute and try again."));
     }
     next();
@@ -210,7 +210,7 @@ io.on("connection", (socket) => {
         socket.emit("chat-error", "Invalid matchmaking request.");
         return;
       }
-      if (!(await consumeEventLimit(socket, "search", 20, 60))) return;
+      if (!(await consumeEventLimit(socket, "search", 50, 60))) return;
       if (payload.adult !== true) {
         socket.emit("chat-error", "You must confirm that you are 18 or older.");
         return;
@@ -253,7 +253,7 @@ io.on("connection", (socket) => {
       return;
     }
     const message = payload.text.trim();
-    if (!(await consumeEventLimit(socket, "message", 45, 60))) return;
+    if (!(await consumeEventLimit(socket, "message", 50, 60))) return;
     if (now - socket.data.lastMessageAt < 650) {
       socket.emit("chat-error", "Slow down a little.");
       return;
@@ -277,7 +277,7 @@ io.on("connection", (socket) => {
       socket.emit("chat-error", "Invalid request.");
       return;
     }
-    if (!(await consumeEventLimit(socket, "next", 30, 60))) return;
+    if (!(await consumeEventLimit(socket, "next", 50, 60))) return;
     try {
       await leaveChat(socket, true);
       socket.emit("chat-reset");
@@ -291,7 +291,7 @@ io.on("connection", (socket) => {
       socket.emit("chat-error", "Choose a valid report reason.");
       return;
     }
-    if (!(await consumeEventLimit(socket, "report", 3, 600))) return;
+    if (!(await consumeEventLimit(socket, "report", 50, 60))) return;
 
     try {
       const reported = redis
