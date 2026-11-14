@@ -233,6 +233,19 @@ io.on("connection", (socket) => {
     }
   });
 
+  socket.on("typing", async (payload) => {
+    if (!payload || typeof payload !== "object" || Array.isArray(payload) ||
+        Object.keys(payload).length !== 1 || typeof payload.isTyping !== "boolean") return;
+    try {
+      const peerId = redis ? await redis.hget(userKey(socket.id), "peer") : socket.data.peer;
+      const status = redis ? await redis.hget(userKey(socket.id), "status") : (peerId ? "matched" : "idle");
+      if (status !== "matched" || !peerId) return;
+      io.to(peerId).emit("partner-typing", { isTyping: payload.isTyping });
+    } catch (error) {
+      console.error("typing relay error", error);
+    }
+  });
+
   socket.on("chat-message", async (payload) => {
     const now = Date.now();
     if (!validateMessagePayload(payload)) {

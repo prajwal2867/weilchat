@@ -188,3 +188,26 @@ test("search event rate limits are enforced per client IP", async (t) => {
   await sleep(250);
   assert.ok(errors.some((message) => /too quickly/i.test(message)));
 });
+
+
+test("typing state is relayed only to the active conversation partner", async (t) => {
+  const url = await startLocalServer(t);
+  const a = client(url);
+  const b = client(url);
+  t.after(() => { a.close(); b.close(); });
+  await Promise.all([event(a, "connect"), event(b, "connect")]);
+  const waiting = event(a, "waiting");
+  const matchedA = event(a, "matched");
+  const matchedB = event(b, "matched");
+  a.emit("find-match", { gender: "man", preference: "woman", adult: true });
+  await waiting;
+  b.emit("find-match", { gender: "woman", preference: "man", adult: true });
+  await Promise.all([matchedA, matchedB]);
+
+  const started = event(b, "partner-typing");
+  a.emit("typing", { isTyping: true });
+  assert.deepEqual(await started, { isTyping: true });
+  const stopped = event(b, "partner-typing");
+  a.emit("typing", { isTyping: false });
+  assert.deepEqual(await stopped, { isTyping: false });
+});

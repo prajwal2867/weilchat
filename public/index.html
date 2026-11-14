@@ -9,7 +9,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/style.css?v=20261113-3">
+  <link rel="stylesheet" href="/style.css?v=20261114-1">
 </head>
 <body>
   <header class="site-header">
@@ -123,7 +123,14 @@
             </div>
           </div>
         </header>
-        <div id="messages" class="chat-messages" role="log" aria-live="polite" aria-relevant="additions"></div>
+        <div id="messages" class="chat-messages" role="log" aria-live="polite" aria-relevant="additions">
+          <div id="typing-indicator" class="typing-indicator hidden" role="status" aria-label="The other person is typing">
+            <span class="typing-avatar" aria-hidden="true">
+              <svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="3.5"/><path d="M5.5 20a6.5 6.5 0 0 1 13 0"/></svg>
+            </span>
+            <span class="typing-bubble" aria-hidden="true"><i></i><i></i><i></i></span>
+          </div>
+        </div>
         <p id="chat-status" class="visually-hidden" role="status">You're connected. Say hello.</p>
         <form id="message-form" class="message-form chat-composer">
           <button type="button" class="attach-button" aria-label="Attachments are unavailable in text-only chats" disabled>
@@ -169,6 +176,6 @@
     </form>
   </dialog>
   <script src="https://cdn.socket.io/4.8.1/socket.io.min.js"></script>
-  <script type="module" src="/app.js?v=20261113-3"></script>
+  <script type="module" src="/app.js?v=20261114-1"></script>
 </body>
 </html>

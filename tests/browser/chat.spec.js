@@ -27,7 +27,9 @@ test("two separate browser sessions can match, chat, report, and leave", async (
     await expect(pageB.locator("#chat")).toBeVisible();
 
     await pageA.locator("#message-input").fill("Hello from browser A");
+    await expect(pageB.locator("#typing-indicator")).toBeVisible();
     await pageA.locator('#message-form button[type=submit]').click();
+    await expect(pageB.locator("#typing-indicator")).toBeHidden();
     await expect(pageB.locator("#messages .message-row:not(.mine) .message-bubble p")).toHaveText("Hello from browser A");
     await expect(pageA.locator("#messages .message-row.mine .message-footer")).toHaveCount(0);
     await expect(pageA.locator("#messages .message-row.mine .message-time")).toHaveCount(0);
