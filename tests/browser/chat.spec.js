@@ -1,5 +1,24 @@
 import { test, expect } from "@playwright/test";
 
+async function expectTypingIndicatorAligned(page) {
+  await expect(page.locator("#messages > :last-child")).toHaveAttribute("id", "typing-indicator");
+  await expect(page.locator("#typing-indicator .typing-avatar")).toHaveCount(0);
+  const offset = await page.evaluate(() => {
+    const messages = document.querySelector("#messages");
+    const indicatorBubble = document.querySelector("#typing-indicator .typing-bubble");
+    const messageRow = document.querySelector("#messages .message-row");
+    const messageAvatar = messageRow.querySelector(".message-avatar");
+    const messagesStyle = getComputedStyle(messages);
+    const messageRowStyle = getComputedStyle(messageRow);
+    const expectedLeft = messages.getBoundingClientRect().left +
+      parseFloat(messagesStyle.paddingLeft) +
+      messageAvatar.getBoundingClientRect().width +
+      parseFloat(messageRowStyle.columnGap);
+    return Math.abs(indicatorBubble.getBoundingClientRect().left - expectedLeft);
+  });
+  expect(offset).toBeLessThan(1);
+}
+
 test("two separate browser sessions can match, chat, report, and leave", async ({ browser }) => {
   const contextA = await browser.newContext();
   const contextB = await browser.newContext();
@@ -37,17 +56,17 @@ test("two separate browser sessions can match, chat, report, and leave", async (
 
     await pageB.locator("#message-input").fill("Hello back from browser B");
     await expect(pageA.locator("#typing-indicator")).toBeVisible();
-    await expect(pageA.locator("#messages > :last-child")).toHaveAttribute("id", "typing-indicator");
+    await expectTypingIndicatorAligned(pageA);
     expect(await pageA.locator("#typing-indicator").evaluate(element => element.previousElementSibling?.innerText)).toContain("Hello from browser A");
-    await expect(pageA.locator("#typing-indicator .typing-avatar")).toHaveCSS("width", "40px");
     await pageB.locator('#message-form button[type=submit]').click();
     await expect(pageA.locator("#messages .message-row:not(.mine) .message-bubble p")).toHaveText("Hello back from browser B");
 
     await pageA.locator("#message-input").fill("Typing from browser A");
     await expect(pageB.locator("#typing-indicator")).toBeVisible();
-    await expect(pageB.locator("#messages > :last-child")).toHaveAttribute("id", "typing-indicator");
+    await expectTypingIndicatorAligned(pageB);
     expect(await pageB.locator("#typing-indicator").evaluate(element => element.previousElementSibling?.innerText)).toContain("Hello back from browser B");
-    await expect(pageB.locator("#typing-indicator .typing-avatar")).toHaveCSS("width", "40px");
+    await pageB.setViewportSize({ width: 390, height: 844 });
+    await expectTypingIndicatorAligned(pageB);
     await pageA.locator("#message-input").fill("");
     await expect(pageB.locator("#typing-indicator")).toBeHidden();
 
