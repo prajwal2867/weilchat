@@ -109,10 +109,10 @@ $("next-button").addEventListener("click",()=>{closeProfileMenu();autoRematch=tr
 $("submit-report").addEventListener("click",event=>{event.preventDefault();if(reportPending)return;const reason=document.querySelector('input[name="reason"]:checked').value;reportPending=true;$("submit-report").disabled=true;$("chat-status").textContent="Submitting your report...";socket.emit("report",{reason});});
 socket.on("connect",()=>{clearTimeout(reconnectTimer);setConnection(true);if(!$("searching").classList.contains("hidden"))startMatch()});
 socket.on("disconnect",()=>{setConnection(false);stopTyping();setRemoteTyping(false);if(matched){matched=false;show("ended");$("chat-status").textContent="Connection interrupted. Start a new chat when you're ready."}});
-socket.on("matched",()=>{clearTimeout(reconnectTimer);matched=true;clearTimeout(typingStopTimer);clearTimeout(remoteTypingTimer);lastTypingSentAt=0;$("messages").replaceChildren();$("messages").append($("typing-indicator"));setRemoteTyping(false);$("chat-status").textContent="You're connected. Say hello.";show("chat")});
+socket.on("matched",()=>{clearTimeout(reconnectTimer);matched=true;clearTimeout(typingStopTimer);clearTimeout(remoteTypingTimer);lastTypingSentAt=0;const typingIndicator=$("typing-indicator");$("messages").replaceChildren(typingIndicator);setRemoteTyping(false);$("chat-status").textContent="You're connected. Say hello.";show("chat")});
 socket.on("partner-typing",payload=>setRemoteTyping(payload?.isTyping===true));
 socket.on("chat-message",message=>addMessage(message.text,false));
 socket.on("partner-left",()=>{stopTyping();setRemoteTyping(false);matched=false;$("chat-status").textContent="The stranger has left the conversation.";show("ended")});
-socket.on("chat-reset",()=>{stopTyping();setRemoteTyping(false);matched=false;$("messages").replaceChildren();if(autoRematch){autoRematch=false;startMatch()}else show("welcome")});
+socket.on("chat-reset",()=>{stopTyping();setRemoteTyping(false);matched=false;$("messages").replaceChildren($("typing-indicator"));if(autoRematch){autoRematch=false;startMatch()}else show("welcome")});
 socket.on("report-received",()=>{reportPending=false;$("submit-report").disabled=false;$("report-dialog").close();$("chat-status").textContent="Report received. Thanks for helping keep Weilchat safer.";});
 socket.on("chat-error",message=>{if(reportPending){reportPending=false;$("submit-report").disabled=false;}if(!$("chat").classList.contains("hidden"))$("chat-status").textContent=message;else $("search-status").textContent=message});
