@@ -45,6 +45,7 @@ function setRemoteTyping(isTyping){
   const indicator=$("typing-indicator");
   clearTimeout(remoteTypingTimer);
   if(!isTyping||!matched){indicator.classList.add("hidden");return}
+  $("messages").append(indicator);
   indicator.classList.remove("hidden");
   remoteTypingTimer=setTimeout(()=>indicator.classList.add("hidden"),2200);
   $("messages").scrollTop=$("messages").scrollHeight;

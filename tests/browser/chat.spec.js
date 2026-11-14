@@ -36,8 +36,20 @@ test("two separate browser sessions can match, chat, report, and leave", async (
     await expect(pageA.locator("#messages .message-row.mine .message-sent")).toHaveCount(0);
 
     await pageB.locator("#message-input").fill("Hello back from browser B");
+    await expect(pageA.locator("#typing-indicator")).toBeVisible();
+    await expect(pageA.locator("#messages > :last-child")).toHaveAttribute("id", "typing-indicator");
+    expect(await pageA.locator("#typing-indicator").evaluate(element => element.previousElementSibling?.innerText)).toContain("Hello from browser A");
+    await expect(pageA.locator("#typing-indicator .typing-avatar")).toHaveCSS("width", "40px");
     await pageB.locator('#message-form button[type=submit]').click();
     await expect(pageA.locator("#messages .message-row:not(.mine) .message-bubble p")).toHaveText("Hello back from browser B");
+
+    await pageA.locator("#message-input").fill("Typing from browser A");
+    await expect(pageB.locator("#typing-indicator")).toBeVisible();
+    await expect(pageB.locator("#messages > :last-child")).toHaveAttribute("id", "typing-indicator");
+    expect(await pageB.locator("#typing-indicator").evaluate(element => element.previousElementSibling?.innerText)).toContain("Hello back from browser B");
+    await expect(pageB.locator("#typing-indicator .typing-avatar")).toHaveCSS("width", "40px");
+    await pageA.locator("#message-input").fill("");
+    await expect(pageB.locator("#typing-indicator")).toBeHidden();
 
     await pageA.locator("#profile-button").click();
     await pageA.locator("#report-button").click();
