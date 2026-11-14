@@ -12,7 +12,7 @@ const socket = io({
   timeout: 12000
 });
 const $ = (id) => document.getElementById(id);
-const screens = ["welcome", "searching", "chat", "ended"];
+const screens = ["landing", "welcome", "searching", "chat", "ended"];
 let matched = false;
 let reconnectTimer;
 let autoRematch = false;
@@ -40,7 +40,7 @@ window.addEventListener("resize",syncChatViewport,{passive:true});
 window.addEventListener("orientationchange",syncChatViewport,{passive:true});
 const viewportObserver=new MutationObserver(syncChatViewport);
 viewportObserver.observe(document.body,{attributes:true,attributeFilter:["class"]});
-function setConnection(connected){$("connection-label").textContent=connected?"ONLINE":"RECONNECTING";document.querySelector(".header-meta .live-dot").style.background=connected?"#9c78f4":"#888"}
+function setConnection(connected){$("connection-label").textContent=connected?"ONLINE":"RECONNECTING"}
 function setRemoteTyping(isTyping){
   const indicator=$("typing-indicator");
   clearTimeout(remoteTypingTimer);
@@ -71,6 +71,8 @@ function startMatch(){
   socket.emit("find-match",{gender,preference:preferenceForGender(gender),adult:adultConfirmed});matched=false;show("searching");
 }
 function requestMatch(){if(adultConfirmed)startMatch();else $("adult-dialog").showModal()}
+$("start-conversation").addEventListener("click",()=>show("welcome"));
+$("open-app").addEventListener("click",()=>show("welcome"));
 $("start-form").addEventListener("submit",event=>{event.preventDefault();requestMatch()});
 $("confirm-adult").addEventListener("click",()=>{adultConfirmed=true;localStorage.setItem(ADULT_CONFIRMATION_KEY,"true");startMatch()});
 $("profile-button").addEventListener("click",()=>{const open=$("profile-menu").classList.toggle("hidden")===false;$("profile-button").setAttribute("aria-expanded",String(open));$("profile-button").setAttribute("aria-label",open&&matchMedia("(max-width: 760px)").matches?"Close chat menu":matchMedia("(max-width: 760px)").matches?"Open chat menu":"Conversation options")});
