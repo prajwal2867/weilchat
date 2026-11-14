@@ -47,6 +47,8 @@ test("two separate browser sessions can match, chat, report, and leave", async (
 
     await expect(pageA.locator("#connection-label")).toHaveText("ONLINE", { timeout: 15000 });
     await expect(pageB.locator("#connection-label")).toHaveText("ONLINE", { timeout: 15000 });
+    await pageA.locator("#start-conversation").click();
+    await pageB.locator("#open-app").click();
     await pageB.locator("label.choice").filter({ hasText: "Female" }).click();
 
     await pageA.locator("#start-button").click();

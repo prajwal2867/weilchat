@@ -13,12 +13,36 @@
 </head>
 <body>
   <header class="site-header">
-    <a class="brand" href="/" aria-label="Weilchat home"><span class="brand-mark">W</span><span>weilchat</span></a>
-    <div class="header-meta"><span class="live-dot"></span><span id="connection-label">CONNECTING</span></div>
+    <div class="brand" aria-label="Weilchat"><span class="brand-mark">W</span><span>weilchat</span></div>
+    <nav class="landing-nav" aria-label="Main navigation">
+      <span class="nav-current">Home</span><span>Chat Rooms</span><span>Blog</span><span>Guidelines</span>
+    </nav>
+    <div class="header-actions">
+      <span class="login-link">Log In</span>
+      <button type="button" class="open-app-button" id="open-app">Open App</button>
+    </div>
+    <div class="header-meta" aria-live="polite"><span class="live-dot"></span><span id="connection-label">CONNECTING</span></div>
   </header>
 
   <main>
-    <section id="welcome" class="app-screen welcome-screen">
+    <section id="landing" class="app-screen landing-screen">
+      <div class="landing-layout">
+        <div class="landing-copy">
+          <h1>Say hello to<br><span>someone new</span></h1>
+          <p>Connect with friendly people from around the world for free.<br class="landing-desktop-break"> Make lasting friendships and enjoy endless chats in a safe,<br class="landing-desktop-break"> anonymous space. No sign-ups required.</p>
+          <button type="button" class="landing-cta" id="start-conversation">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20.5 11.5a8.3 8.3 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.3 8.3 0 0 1-3.8-.9L3 21l1.9-5.2a8.3 8.3 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.3 8.3 0 0 1 3.8-.9h.5a8.5 8.5 0 0 1 7.5 8z"/></svg>
+            <span>Start a Conversation</span><span class="cta-arrow" aria-hidden="true">→</span>
+          </button>
+        </div>
+        <aside class="conversation-art landing-art" aria-label="Abstract chat illustration">
+          <div class="art-circle circle-top"></div><div class="art-circle circle-left"></div><div class="art-circle circle-bottom"></div>
+          <div class="chat-illustration"><div class="illustration-sheet"></div><div class="illustration-bubble"><i></i><i></i></div></div>
+        </aside>
+      </div>
+    </section>
+
+    <section id="welcome" class="app-screen welcome-screen hidden">
       <div class="welcome-layout">
         <div class="welcome-copy">
           <div class="hero-heading" aria-label="Good talks start with hello">
@@ -35,9 +59,9 @@
                 <label class="choice"><input type="radio" name="gender" value="woman"><span>Female</span></label>
               </div>
             </fieldset>
-            <button class="primary-button" type="submit" id="start-button">Find my conversation <span aria-hidden="true">→</span></button>
+            <button class="primary-button" type="submit" id="start-button">Continue <span aria-hidden="true">→</span></button>
           </form>
-          <p class="fine-print">We'll match you up with someone who choose the other gender.</p>
+          <p class="fine-print">Choose who you would like to meet. We will find someone for you.</p>
         </div>
 
         <aside class="conversation-art" aria-label="Illustration of an anonymous conversation">
@@ -173,6 +197,6 @@
     </form>
   </dialog>
   <script src="https://cdn.socket.io/4.8.1/socket.io.min.js"></script>
-  <script type="module" src="/app.js?v=20261114-1"></script>
+  <script type="module" src="/app.js?v=20261114-2"></script>
 </body>
 </html>
